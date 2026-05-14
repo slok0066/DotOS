@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#111111"
+    android:padding="24dp">
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="monospace"
+        android:letterSpacing="0.08"
+        android:text="ANALOG"
+        android:textColor="#999999"
+        android:textSize="14sp" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:fontFamily="sans-serif-black"
+        android:text="10:30"
+        android:textColor="#FFFFFF"
+        android:textSize="36sp" />
+    <RelativeLayout
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:background="@drawable/widget_preview_outline">
+        <View android:layout_width="4dp" android:layout_height="35dp" android:background="#FFFFFF" android:layout_centerInParent="true" android:layout_marginTop="-17dp" />
+        <View android:layout_width="40dp" android:layout_height="3dp" android:background="#FFFFFF" android:layout_centerInParent="true" android:layout_marginStart="20dp" />
+        <View android:layout_width="8dp" android:layout_height="8dp" android:background="#FFFFFF" android:layout_centerInParent="true" />
+    </RelativeLayout>
+</RelativeLayout>

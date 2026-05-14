@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">DotOS</string>
+    <string name="clock_widget_description">Nothing-style digital clock with date</string>
+    <string name="clock_analog_widget_description">Analog clock with minimal design</string>
+    <string name="clock_binary_widget_description">Binary time representation</string>
+    <string name="clock_vertical_widget_description">Vertical time stack (2x2)</string>
+    <string name="clock_seconds_widget_description">Precise time with seconds (4x2)</string>
+    <string name="calendar_widget_description">Calendar with current date and events</string>
+    <string name="calendar_week_widget_description">Week view with today highlighted</string>
+    <string name="calendar_event_widget_description">Upcoming events timeline</string>
+    <string name="calendar_month_widget_description">Month grid view (2x2)</string>
+    <string name="calendar_agenda_widget_description">Full day agenda (4x2)</string>
+    <string name="battery_widget_description">Battery level and charging status</string>
+    <string name="battery_circular_widget_description">Circular battery gauge</string>
+    <string name="battery_bars_widget_description">Segmented battery bars</string>
+    <string name="battery_minimal_widget_description">Minimal battery percentage (2x2)</string>
+    <string name="battery_detailed_widget_description">Detailed battery stats (4x2)</string>
+    <string name="storage_widget_description">Device storage usage</string>
+    <string name="storage_circular_widget_description">Circular storage ring</string>
+    <string name="storage_breakdown_widget_description">Storage breakdown by category</string>
+    <string name="storage_compact_widget_description">Compact storage info (2x2)</string>
+    <string name="storage_detailed_widget_description">Detailed storage analysis (4x2)</string>
+    <string name="calculator_widget_description">4x5 calculator widget with quick math</string>
+    <string name="tap_counter_widget_description">2x2 tap counter widget</string>
+    <string name="tap_counter_dial_widget_description">2x2 tap counter dial widget</string>
+    <string name="tap_counter_matrix_widget_description">2x2 tap counter matrix widget</string>
+    <string name="screen_time_minimal_widget_description">Minimal screen time widget with dot timer</string>
+    <string name="screen_time_ring_widget_description">Screen time widget with progress ring</string>
+    <string name="screen_time_split_widget_description">Split screen time info card</string>
+    <string name="sound_widget_description">Sound mode toggle (2x2)</string>
+    <string name="sound_segments_widget_description">Sound mode segments (2x2)</string>
+    <string name="sound_dial_widget_description">Sound mode dial (2x2)</string>
+    <string name="spinner_widget_description">2x2 spinner wheel game widget</string>
+    <string name="bottle_spin_widget_description">2x2 bottle spin game widget</string>
+    <string name="dice_roll_widget_description">2x2 dice roll game widget</string>
+    <string name="dino_game_widget_description">2x2 Google dino launcher widget</string>
+    <string name="widget_coin_flip_desc">2x2 coin flip game widget</string>
+</resources>
