@@ -214,9 +214,9 @@ object ScreenTimeWidgetUpdater {
         val stats = ScreenTimeUsageReader.readToday(context)
         val views = RemoteViews(context.packageName, R.layout.widget_layout)
         val bitmap = when (design) {
-            ScreenTimeDesign.MINIMAL -> ScreenTimeRenderer.renderMinimal(context, stats)
-            ScreenTimeDesign.RING -> ScreenTimeRenderer.renderRing(context, stats, DAILY_GOAL_MILLIS)
-            ScreenTimeDesign.SPLIT -> ScreenTimeRenderer.renderSplit(context, stats, DAILY_GOAL_MILLIS)
+            ScreenTimeDesign.MINIMAL -> ScreenTimeRenderer.renderMinimal(context, appWidgetId, stats)
+            ScreenTimeDesign.RING -> ScreenTimeRenderer.renderRing(context, appWidgetId, stats, DAILY_GOAL_MILLIS)
+            ScreenTimeDesign.SPLIT -> ScreenTimeRenderer.renderSplit(context, appWidgetId, stats, DAILY_GOAL_MILLIS)
         }
 
         views.setImageViewBitmap(R.id.widget_image, bitmap)
@@ -391,8 +391,8 @@ object ScreenTimeRenderer {
     private const val PADDING = 34f
     private const val CORNER_RADIUS = 48f
 
-    fun renderMinimal(context: Context, stats: ScreenTimeStats): Bitmap {
-        val palette = WidgetTheme.palette(context)
+    fun renderMinimal(context: Context, appWidgetId: Int, stats: ScreenTimeStats): Bitmap {
+        val palette = WidgetTheme.paletteForWidget(context, appWidgetId, "screen_time")
         val bitmap = createBitmap()
         val canvas = Canvas(bitmap)
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
@@ -428,8 +428,8 @@ object ScreenTimeRenderer {
         return bitmap
     }
 
-    fun renderRing(context: Context, stats: ScreenTimeStats, goalMillis: Long): Bitmap {
-        val palette = WidgetTheme.palette(context)
+    fun renderRing(context: Context, appWidgetId: Int, stats: ScreenTimeStats, goalMillis: Long): Bitmap {
+        val palette = WidgetTheme.paletteForWidget(context, appWidgetId, "screen_time")
         val bitmap = createBitmap()
         val canvas = Canvas(bitmap)
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
@@ -487,8 +487,8 @@ object ScreenTimeRenderer {
         return bitmap
     }
 
-    fun renderSplit(context: Context, stats: ScreenTimeStats, goalMillis: Long): Bitmap {
-        val palette = WidgetTheme.palette(context)
+    fun renderSplit(context: Context, appWidgetId: Int, stats: ScreenTimeStats, goalMillis: Long): Bitmap {
+        val palette = WidgetTheme.paletteForWidget(context, appWidgetId, "screen_time")
         val bitmap = createBitmap()
         val canvas = Canvas(bitmap)
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)

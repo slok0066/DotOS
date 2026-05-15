@@ -36,6 +36,11 @@ class MusicVinylWidgetProvider : AppWidgetProvider() {
         }
     }
 
+    override fun onDeleted(context: Context, appWidgetIds: IntArray) {
+        super.onDeleted(context, appWidgetIds)
+        for (id in appWidgetIds) { WidgetTheme.removeWidgetTheme(context, id) }
+    }
+
     companion object {
         private var animHandler: Handler? = null
 
@@ -74,8 +79,8 @@ class MusicVinylWidgetProvider : AppWidgetProvider() {
         fun updateAppWidget(context: Context, appWidgetManager: AppWidgetManager,
                             appWidgetId: Int, rotation: Float) {
             val views = RemoteViews(context.packageName, R.layout.widget_layout)
-            val palette = WidgetTheme.palette(context)
-            views.setImageViewBitmap(R.id.widget_image, renderVinyl(context, palette, rotation))
+            val palette = WidgetTheme.paletteForWidget(context, appWidgetId, "music")
+            views.setImageViewBitmap(R.id.widget_image, renderVinyl(context, palette, rotation, appWidgetId))
 
             val intent = Intent(context, MusicVinylWidgetProvider::class.java).apply {
                 action = "ACTION_VINYL_SPIN"
@@ -88,7 +93,7 @@ class MusicVinylWidgetProvider : AppWidgetProvider() {
             appWidgetManager.updateAppWidget(appWidgetId, views)
         }
 
-        private fun renderVinyl(context: Context, palette: WidgetTheme.Palette, rotation: Float): Bitmap {
+        private fun renderVinyl(context: Context, palette: WidgetTheme.Palette, rotation: Float, appWidgetId: Int): Bitmap {
             val prefs = context.getSharedPreferences(MUSIC_PREFS_NAME, Context.MODE_PRIVATE)
             val trackName = prefs.getString(KEY_TRACK, "") ?: ""
             val artistName = prefs.getString(KEY_ARTIST, "") ?: ""

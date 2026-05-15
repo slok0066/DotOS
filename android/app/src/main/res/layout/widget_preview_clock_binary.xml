@@ -1,80 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#111111"
-    android:padding="24dp">
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:fontFamily="monospace"
-        android:letterSpacing="0.08"
-        android:text="BINARY"
-        android:textColor="#999999"
-        android:textSize="14sp" />
+    android:padding="20dp">
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="top|start" android:typeface="monospace" android:text="CLOCK" android:textColor="#666666" android:textSize="10sp" />
+    <FrameLayout android:layout_width="8dp" android:layout_height="8dp" android:layout_gravity="top|end" android:background="#D71921" />
     
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_marginTop="20dp"
-        android:orientation="horizontal">
-        
-        <!-- Column 1 -->
-        <LinearLayout android:orientation="vertical" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginEnd="16dp" android:gravity="center">
-            <View android:layout_width="10dp" android:layout_height="10dp" android:background="#333333" android:layout_marginBottom="8dp"/>
-            <View android:layout_width="10dp" android:layout_height="10dp" android:background="#FFFFFF" android:layout_marginBottom="8dp"/>
-            <View android:layout_width="10dp" android:layout_height="10dp" android:background="#333333" android:layout_marginBottom="8dp"/>
-            <View android:layout_width="10dp" android:layout_height="10dp" android:background="#FFFFFF" android:layout_marginBottom="4dp"/>
-            <TextView android:text="1" android:textColor="#999999" android:textSize="12sp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFamily="monospace"/>
-            <TextView android:text="H" android:textColor="#666666" android:textSize="10sp" android:layout_width="wrap_content" android:layout_height="wrap_content" />
-        </LinearLayout>
-
-        <!-- Column 2 -->
-        <LinearLayout android:orientation="vertical" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginEnd="24dp" android:gravity="center">
-            <View android:layout_width="10dp" android:layout_height="10dp" android:background="#FFFFFF" android:layout_marginBottom="8dp"/>
-            <View android:layout_width="10dp" android:layout_height="10dp" android:background="#333333" android:layout_marginBottom="8dp"/>
-            <View android:layout_width="10dp" android:layout_height="10dp" android:background="#333333" android:layout_marginBottom="8dp"/>
-            <View android:layout_width="10dp" android:layout_height="10dp" android:background="#333333" android:layout_marginBottom="4dp"/>
-            <TextView android:text="0" android:textColor="#999999" android:textSize="12sp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFamily="monospace"/>
-            <TextView android:text="H" android:textColor="#666666" android:textSize="10sp" android:layout_width="wrap_content" android:layout_height="wrap_content" />
-        </LinearLayout>
-
-        <!-- Column 3 -->
-        <LinearLayout android:orientation="vertical" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginEnd="16dp" android:gravity="center">
-            <View android:layout_width="10dp" android:layout_height="10dp" android:background="#333333" android:layout_marginBottom="8dp"/>
-            <View android:layout_width="10dp" android:layout_height="10dp" android:background="#FFFFFF" android:layout_marginBottom="8dp"/>
-            <View android:layout_width="10dp" android:layout_height="10dp" android:background="#FFFFFF" android:layout_marginBottom="8dp"/>
-            <View android:layout_width="10dp" android:layout_height="10dp" android:background="#333333" android:layout_marginBottom="4dp"/>
-            <TextView android:text="3" android:textColor="#999999" android:textSize="12sp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFamily="monospace"/>
-            <TextView android:text="M" android:textColor="#666666" android:textSize="10sp" android:layout_width="wrap_content" android:layout_height="wrap_content" />
-        </LinearLayout>
-
-        <!-- Column 4 -->
-        <LinearLayout android:orientation="vertical" android:layout_width="wrap_content" android:layout_height="wrap_content" android:gravity="center">
-            <View android:layout_width="10dp" android:layout_height="10dp" android:background="#333333" android:layout_marginBottom="8dp"/>
-            <View android:layout_width="10dp" android:layout_height="10dp" android:background="#333333" android:layout_marginBottom="8dp"/>
-            <View android:layout_width="10dp" android:layout_height="10dp" android:background="#333333" android:layout_marginBottom="8dp"/>
-            <View android:layout_width="10dp" android:layout_height="10dp" android:background="#FFFFFF" android:layout_marginBottom="4dp"/>
-            <TextView android:text="0" android:textColor="#999999" android:textSize="12sp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFamily="monospace"/>
-            <TextView android:text="M" android:textColor="#666666" android:textSize="10sp" android:layout_width="wrap_content" android:layout_height="wrap_content" />
-        </LinearLayout>
+    <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:gravity="center" android:orientation="vertical">
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:typeface="monospace" android:text="10:30" android:textColor="#FFFFFF" android:textSize="32sp" android:textStyle="bold" />
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:typeface="monospace" android:text="STATUS" android:textColor="#444444" android:textSize="8sp" />
     </LinearLayout>
-
-    <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="vertical" android:layout_alignParentEnd="true" android:layout_centerVertical="true" android:gravity="end">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="sans-serif-black"
-            android:text="10:30"
-            android:textColor="#FFFFFF"
-            android:textSize="36sp" />
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="monospace"
-            android:text="DECIMAL"
-            android:textColor="#999999"
-            android:textSize="12sp" />
-    </LinearLayout>
-</RelativeLayout>
+</FrameLayout>

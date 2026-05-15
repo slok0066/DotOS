@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#000000"
+    android:background="#111111"
     android:gravity="center_vertical"
     android:orientation="horizontal"
     android:padding="20dp">
@@ -16,36 +16,53 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="monospace"
-            android:letterSpacing="0.08"
+            android:typeface="monospace"
+
             android:text="BATTERY"
-            android:textColor="#9A9A9A"
-            android:textSize="11sp" />
+            android:textColor="#999999"
+            android:textSize="14sp" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="monospace"
+            android:typeface="monospace"
             android:text="85%"
             android:textColor="#FFFFFF"
-            android:textSize="38sp"
-            android:textStyle="bold" />
+            android:textSize="48sp"
+            android:textStyle="bold"
+            android:layout_marginTop="4dp" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="monospace"
+            android:typeface="monospace"
             android:text="CHARGING"
-            android:textColor="#00C853"
-            android:textSize="11sp" />
+            android:textColor="#4CAF50"
+            android:textSize="14sp" />
     </LinearLayout>
 
-    <ProgressBar
-        style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="78dp"
-        android:layout_height="8dp"
-        android:max="100"
-        android:progress="85"
-        android:progressTint="#00C853"
-        android:progressBackgroundTint="#333333" />
+    <RelativeLayout
+        android:layout_width="60dp"
+        android:layout_height="90dp"
+        android:gravity="center">
+
+        <FrameLayout
+            android:layout_width="60dp"
+            android:layout_height="80dp"
+            android:background="@drawable/widget_preview_outline" />
+
+        <FrameLayout
+            android:layout_width="16dp"
+            android:layout_height="6dp"
+            android:background="#999999"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="6dp"
+            android:layout_centerHorizontal="true" />
+
+        <FrameLayout
+            android:layout_width="48dp"
+            android:layout_height="68dp"
+            android:background="#4CAF50"
+            android:layout_centerInParent="true" />
+    </RelativeLayout>
 </LinearLayout>

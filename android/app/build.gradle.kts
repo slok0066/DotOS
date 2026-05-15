@@ -40,12 +40,23 @@ android {
                 "proguard-rules.pro"
             )
             
+            // Enable R8 full mode for better shrinking
+            isDebuggable = false
+            
             // Signing with the debug keys for now
             signingConfig = signingConfigs.getByName("debug")
         }
     }
     
-    // Flutter already handles ABI filtering, so we don't need splits
+    // Split APKs per ABI for smaller sizes
+    splits {
+        abi {
+            isEnable = true
+            reset()
+            include("armeabi-v7a", "arm64-v8a", "x86_64")
+            isUniversalApk = false
+        }
+    }
 }
 
 flutter {

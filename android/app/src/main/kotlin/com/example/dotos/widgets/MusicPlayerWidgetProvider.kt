@@ -32,10 +32,15 @@ class MusicPlayerWidgetProvider : AppWidgetProvider() {
         }
     }
 
+    override fun onDeleted(context: Context, appWidgetIds: IntArray) {
+        super.onDeleted(context, appWidgetIds)
+        for (id in appWidgetIds) { WidgetTheme.removeWidgetTheme(context, id) }
+    }
+
     companion object {
         fun updateWidget(context: Context, mgr: AppWidgetManager, id: Int) {
             val views = RemoteViews(context.packageName, R.layout.widget_music_player)
-            val palette = WidgetTheme.palette(context)
+            val palette = WidgetTheme.paletteForWidget(context, id, "music")
             views.setImageViewBitmap(R.id.music_player_image, render(context, palette))
             views.setOnClickPendingIntent(
                 R.id.music_player_image,

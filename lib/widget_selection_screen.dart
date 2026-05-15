@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -24,47 +23,61 @@ class WidgetSelectionScreen extends StatefulWidget {
 }
 
 class _WidgetSelectionScreenState extends State<WidgetSelectionScreen> {
-  static const _widgetThemeKey = 'widget_theme';
+  static const _clockFormatKey = 'clock_24hour';
+  bool _is24Hour = true;
   String _widgetTheme = 'dark';
 
   @override
   void initState() {
     super.initState();
+    _loadClockFormat();
     _loadWidgetTheme();
   }
 
-  Future<void> _loadWidgetTheme() async {
+  Future<void> _loadClockFormat() async {
     final prefs = await SharedPreferences.getInstance();
-    final savedTheme = prefs.getString(_widgetThemeKey);
-    final fallbackTheme = WidgetsBinding.instance.platformDispatcher.platformBrightness == Brightness.dark
-        ? 'dark'
-        : 'light';
-    final theme = savedTheme == 'light' || savedTheme == 'dark' ? savedTheme! : fallbackTheme;
-
-    if (savedTheme == null) {
-      await prefs.setString(_widgetThemeKey, theme);
-      await WidgetService.setWidgetTheme(theme);
-    }
-
-    if (mounted && _widgetTheme != theme) {
+    final saved = prefs.getBool(_clockFormatKey);
+    if (saved != null && mounted) {
       setState(() {
-        _widgetTheme = theme;
+        _is24Hour = saved;
       });
     }
   }
 
-  Future<void> _setWidgetTheme(String theme) async {
-    if (_widgetTheme == theme) {
-      return;
-    }
-
+  Future<void> _toggleClockFormat() async {
+    HapticFeedback.selectionClick();
+    final newFormat = !_is24Hour;
     setState(() {
-      _widgetTheme = theme;
+      _is24Hour = newFormat;
     });
-
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_widgetThemeKey, theme);
-    await WidgetService.setWidgetTheme(theme);
+    await prefs.setBool(_clockFormatKey, newFormat);
+  }
+
+  Future<void> _loadWidgetTheme() async {
+    final prefs = await SharedPreferences.getInstance();
+    final key = 'widget_theme_${widget.category}';
+    final saved = prefs.getString(key);
+    if (saved != null && (saved == 'dark' || saved == 'light') && mounted) {
+      setState(() {
+        _widgetTheme = saved;
+      });
+    } else {
+      final fallback = WidgetsBinding.instance.platformDispatcher.platformBrightness == Brightness.dark ? 'dark' : 'light';
+      setState(() {
+        _widgetTheme = fallback;
+      });
+    }
+  }
+
+  Future<void> _toggleWidgetTheme() async {
+    HapticFeedback.selectionClick();
+    final newTheme = _widgetTheme == 'dark' ? 'light' : 'dark';
+    setState(() {
+      _widgetTheme = newTheme;
+    });
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('widget_theme_${widget.category}', newTheme);
   }
 
   @override
@@ -89,7 +102,10 @@ class _WidgetSelectionScreenState extends State<WidgetSelectionScreen> {
               child: Row(
                 children: [
                   GestureDetector(
-                    onTap: () => Navigator.pop(context),
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      Navigator.pop(context);
+                    },
                     child: Container(
                       width: 40,
                       height: 40,
@@ -113,129 +129,221 @@ class _WidgetSelectionScreenState extends State<WidgetSelectionScreen> {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  GestureDetector(
-                    onTap: widget.onToggleTheme,
-                    child: Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        border: Border.all(color: borderColor, width: 1),
-                        borderRadius: BorderRadius.circular(20),
+                  const SizedBox(width: 8),
+                  // Widget theme toggle - pill style with label
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'WIDGET THEME',
+                        style: NothingTheme.mono(fontSize: 8, color: textSecondary),
                       ),
-                      child: Icon(
-                        isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
-                        color: textSecondary,
-                        size: 18,
+                      const SizedBox(width: 8),
+                      GestureDetector(
+                        onTap: _toggleWidgetTheme,
+                        child: Tooltip(
+                          message: 'Widget theme: ${_widgetTheme.toUpperCase()}',
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 250),
+                            height: 36,
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            decoration: BoxDecoration(
+                              color: _widgetTheme == 'dark' ? textPrimary : borderColor,
+                              border: Border.all(color: borderColor, width: 1),
+                              borderRadius: BorderRadius.circular(18),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  _widgetTheme == 'dark' ? Icons.dark_mode : Icons.light_mode,
+                                  color: _widgetTheme == 'dark'
+                                      ? (isDark ? NothingTheme.black : Colors.white)
+                                      : textSecondary,
+                                  size: 14,
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  _widgetTheme.toUpperCase(),
+                                  style: NothingTheme.mono(
+                                    fontSize: 9,
+                                    color: _widgetTheme == 'dark'
+                                        ? (isDark ? NothingTheme.black : Colors.white)
+                                        : textSecondary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(width: 8),
+                  // App theme toggle
+                  GestureDetector(
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      widget.onToggleTheme?.call();
+                    },
+                    child: Tooltip(
+                      message: 'Toggle app theme',
+                      child: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: borderColor, width: 1),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Icon(
+                          isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
+                          color: textSecondary,
+                          size: 18,
+                        ),
                       ),
                     ),
                   ),
                 ],
               ),
             ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
-                child: Row(
+            Expanded(
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                child: Column(
+                  key: ValueKey('${widget.category}-$_widgetTheme-$_is24Hour'),
                   children: [
-                    Text(
-                      'WIDGET THEME',
-                      style: NothingTheme.mono(fontSize: 10, color: textSecondary),
-                    ),
-                    const SizedBox(width: 16),
                     Expanded(
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: () => _setWidgetTheme('dark'),
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 160),
-                                height: 36,
-                                decoration: BoxDecoration(
-                                  color: _widgetTheme == 'dark' ? textPrimary : Colors.transparent,
-                                  border: Border.all(color: borderColor, width: 1),
-                                  borderRadius: BorderRadius.circular(8),
+                      child: GridView.builder(
+                        key: ValueKey('grid-${widget.category}'),
+                        padding: EdgeInsets.fromLTRB(24, 12, 24, widget.category == 'clock' ? 12 : 24),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 16,
+                          mainAxisSpacing: 16,
+                          childAspectRatio: widget.category == 'music' ? 0.82 : 0.85,
+                        ),
+                        itemCount: widget.category == 'clock'
+                          ? 3
+                          : (widget.category == 'calculator'
+                            ? 1
+                            : (widget.category == 'utilities'
+                              ? 3
+                              : (widget.category == 'games'
+                                ? 5
+                                : (widget.category == 'music'
+              ? 5
+                                  : ((widget.category == 'sound' || widget.category == 'screen_time')
+                                      ? 3
+                                      : (widget.category == 'storage' ? 4 : (widget.category == 'calendar' ? 4 : 5))))))),
+                        itemBuilder: (context, index) {
+                          return TweenAnimationBuilder<double>(
+                            key: ValueKey('card-$index'),
+                            tween: Tween(begin: 0.0, end: 1.0),
+                            duration: Duration(milliseconds: 300 + (index * 60)),
+                            curve: const Cubic(0.2, 0.0, 0.0, 1.0),
+                            builder: (context, value, child) {
+                              return Opacity(
+                                opacity: value,
+                                child: Transform.scale(
+                                  scale: 0.95 + (0.05 * value),
+                                  child: child,
                                 ),
-                                child: Center(
-                                  child: Text(
-                                    'DARK',
-                                    style: NothingTheme.mono(
-                                      fontSize: 11,
-                                      color: _widgetTheme == 'dark'
-                                          ? (isDark ? NothingTheme.black : Colors.white)
-                                          : textSecondary,
-                                    ),
-                                  ),
-                                ),
-                              ),
+                              );
+                            },
+                            child: _buildWidgetGridCard(
+                              context,
+                              index + 1,
+                              isDark,
+                              textPrimary,
+                              textSecondary,
+                              borderColor,
+                              surfaceRaised,
+                              innerSurface,
                             ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: () => _setWidgetTheme('light'),
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 160),
-                                height: 36,
-                                decoration: BoxDecoration(
-                                  color: _widgetTheme == 'light' ? textPrimary : Colors.transparent,
-                                  border: Border.all(color: borderColor, width: 1),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Center(
-                                  child: Text(
-                                    'LIGHT',
-                                    style: NothingTheme.mono(
-                                      fontSize: 11,
-                                      color: _widgetTheme == 'light'
-                                          ? (isDark ? NothingTheme.black : Colors.white)
-                                          : textSecondary,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
+                          );
+                        },
                       ),
                     ),
+                    if (widget.category == 'clock')
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: surfaceRaised,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: borderColor, width: 1),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(Icons.access_time, size: 14, color: textSecondary),
+                              const SizedBox(width: 8),
+                              Text(
+                                'TIME FORMAT',
+                                style: NothingTheme.mono(fontSize: 9, color: textSecondary),
+                              ),
+                              const Spacer(),
+                              GestureDetector(
+                                onTap: _toggleClockFormat,
+                                child: AnimatedContainer(
+                                  duration: const Duration(milliseconds: 200),
+                                  height: 32,
+                                  decoration: BoxDecoration(
+                                    border: Border.all(color: borderColor, width: 1),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      AnimatedContainer(
+                                        duration: const Duration(milliseconds: 200),
+                                        width: 48,
+                                        height: 32,
+                                        decoration: BoxDecoration(
+                                          color: !_is24Hour ? textPrimary : Colors.transparent,
+                                          borderRadius: BorderRadius.circular(7),
+                                        ),
+                                        child: Center(
+                                          child: Text(
+                                            '12H',
+                                            style: NothingTheme.mono(
+                                              fontSize: 10,
+                                              color: !_is24Hour
+                                                  ? (isDark ? NothingTheme.black : Colors.white)
+                                                  : textSecondary,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      AnimatedContainer(
+                                        duration: const Duration(milliseconds: 200),
+                                        width: 48,
+                                        height: 32,
+                                        decoration: BoxDecoration(
+                                          color: _is24Hour ? textPrimary : Colors.transparent,
+                                          borderRadius: BorderRadius.circular(7),
+                                        ),
+                                        child: Center(
+                                          child: Text(
+                                            '24H',
+                                            style: NothingTheme.mono(
+                                              fontSize: 10,
+                                              color: _is24Hour
+                                                  ? (isDark ? NothingTheme.black : Colors.white)
+                                                  : textSecondary,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                   ],
                 ),
-              ),
-            Expanded(
-              child: GridView.builder(
-                padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                  childAspectRatio: widget.category == 'music' ? 0.82 : 0.85,
-                ),
-                itemCount: widget.category == 'clock'
-                  ? 3
-                  : (widget.category == 'calculator'
-                    ? 1
-                    : (widget.category == 'utilities'
-                      ? 3
-                      : (widget.category == 'games'
-                        ? 5
-                        : (widget.category == 'music'
-          ? 5
-                          : ((widget.category == 'sound' || widget.category == 'screen_time')
-                              ? 3
-                              : (widget.category == 'storage' ? 4 : 5)))))),
-                itemBuilder: (context, index) {
-                  return _buildWidgetGridCard(
-                    context,
-                    index + 1,
-                    isDark,
-                    textPrimary,
-                    textSecondary,
-                    borderColor,
-                    surfaceRaised,
-                    innerSurface,
-                  );
-                },
               ),
             ),
           ],
@@ -259,7 +367,10 @@ class _WidgetSelectionScreenState extends State<WidgetSelectionScreen> {
     final sizeLabel = _getWidgetSizeLabel(widgetType);
 
     return GestureDetector(
-      onTap: () => _addWidget(context, widgetType),
+      onTap: () {
+        HapticFeedback.mediumImpact();
+        _addWidget(context, widgetType);
+      },
       child: widgetType == 'calculator_01'
           ? _buildMiniatureCalculatorCard(context, styleName, sizeLabel, isDark, textPrimary, textSecondary, borderColor)
           : Container(
@@ -428,10 +539,9 @@ String _getWidgetSizeLabel(String widgetType) {
        case 'music_03':
        case 'music_05':
          return '2×2';
-       case 'calendar_05':
-       case 'battery_05':
-       case 'storage_05':
-         return '4×2';
+        case 'battery_05':
+        case 'storage_05':
+          return '4×2';
        case 'calculator_01':
          return '4×5';
        case 'music_04':
@@ -460,8 +570,6 @@ String _getWidgetSizeLabel(String widgetType) {
         return _buildEventListPreview(textPrimary, textSecondary);
       case 'calendar_04':
         return _buildMonthGridPreview(textSecondary, borderColor);
-      case 'calendar_05':
-        return _buildAgendaPreview(textPrimary, textSecondary);
       
       // Battery widgets
       case 'battery_01':
@@ -556,10 +664,15 @@ case 'calculator_01':
     Color textSecondary,
     Color borderColor,
   ) {
+    final calcBg = isDark ? const Color(0xFF000000) : const Color(0xFFF5F5F0);
+    final calcBorder = isDark ? const Color(0xFF222222) : const Color(0xFFDDDDDD);
+    final calcText = isDark ? const Color(0xFFFFFFFF) : const Color(0xFF000000);
+    final calcLabel = isDark ? const Color(0xFF999999) : const Color(0xFF666666);
+
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF000000), // OLED Black
-        border: Border.all(color: const Color(0xFF222222), width: 1),
+        color: calcBg,
+        border: Border.all(color: calcBorder, width: 1),
         borderRadius: BorderRadius.circular(24),
       ),
       padding: const EdgeInsets.all(12),
@@ -573,24 +686,24 @@ case 'calculator_01':
               children: [
                 Text(
                   '12+7',
-                  style: NothingTheme.mono(fontSize: 10, color: const Color(0xFF999999)),
+                  style: NothingTheme.mono(fontSize: 10, color: calcLabel),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
                   '19',
-                  style: NothingTheme.doto(fontSize: 24, color: const Color(0xFFFFFFFF)),
+                  style: NothingTheme.doto(fontSize: 24, color: calcText),
                   maxLines: 1,
                 ),
                 const SizedBox(height: 8),
                 Expanded(
                   child: Column(
                     children: [
-                      _calcPreviewRow(['C', 'B', '/'], isTop: true),
-                      _calcPreviewRow(['7', '8', '9', 'x']),
-                      _calcPreviewRow(['4', '5', '6', '-']),
-                      _calcPreviewRow(['1', '2', '3', '+']),
-                      _calcPreviewRow(['0', '.', '='], isBottom: true),
+                      _calcPreviewRow(['C', 'B', '/'], isTop: true, isDark: isDark),
+                      _calcPreviewRow(['7', '8', '9', 'x'], isDark: isDark),
+                      _calcPreviewRow(['4', '5', '6', '-'], isDark: isDark),
+                      _calcPreviewRow(['1', '2', '3', '+'], isDark: isDark),
+                      _calcPreviewRow(['0', '.', '='], isBottom: true, isDark: isDark),
                     ],
                   ),
                 ),
@@ -600,7 +713,7 @@ case 'calculator_01':
           const SizedBox(height: 10),
           Text(
             styleName,
-            style: NothingTheme.grotesk(fontSize: 14, color: const Color(0xFFFFFFFF)),
+            style: NothingTheme.grotesk(fontSize: 14, color: calcText),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -610,19 +723,19 @@ case 'calculator_01':
             children: [
               Text(
                 sizeLabel,
-                style: NothingTheme.mono(fontSize: 9, color: const Color(0xFF999999)),
+                style: NothingTheme.mono(fontSize: 9, color: calcLabel),
               ),
               Container(
                 width: 28,
                 height: 28,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFFFFFF),
+                  color: calcText,
                   borderRadius: BorderRadius.circular(999),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.add,
                   size: 14,
-                  color: Color(0xFF000000),
+                  color: calcBg,
                 ),
               ),
             ],
@@ -632,20 +745,26 @@ case 'calculator_01':
     );
   }
 
-  Widget _calcPreviewRow(List<String> labels, {bool isTop = false, bool isBottom = false}) {
+  Widget _calcPreviewRow(List<String> labels, {bool isTop = false, bool isBottom = false, bool isDark = true}) {
+    final btnBg = isDark ? const Color(0xFF1A1A1A) : const Color(0xFFE8E8E8);
+    final btnBorder = isDark ? const Color(0xFF333333) : const Color(0xFFCCCCCC);
+    final btnFg = isDark ? const Color(0xFFFFFFFF) : const Color(0xFF000000);
+    final btnAccent = const Color(0xFFD71921);
+    final btnAccentFg = const Color(0xFF000000);
+
     return Expanded(
       child: Padding(
         padding: const EdgeInsets.only(bottom: 2.0),
         child: Row(
           children: labels.map((label) {
-            Color bgColor = const Color(0xFF1A1A1A);
-            Color fgColor = const Color(0xFFFFFFFF);
+            Color bgColor = btnBg;
+            Color fgColor = btnFg;
             
             if (label == '=' && isBottom) {
-              bgColor = const Color(0xFFD71921); // Nothing Red
-              fgColor = const Color(0xFF000000);
+              bgColor = btnAccent;
+              fgColor = btnAccentFg;
             } else if (label == 'C' || label == '/' || label == 'x' || label == '-' || label == '+') {
-              fgColor = const Color(0xFFD71921);
+              fgColor = btnAccent;
             }
 
             int flex = 1;
@@ -658,7 +777,7 @@ case 'calculator_01':
                 margin: const EdgeInsets.only(right: 2.0),
                 decoration: BoxDecoration(
                   color: bgColor,
-                  border: Border.all(color: const Color(0xFF333333), width: 0.5),
+                  border: Border.all(color: btnBorder, width: 0.5),
                   borderRadius: BorderRadius.circular(100),
                 ),
                 child: Center(
@@ -676,24 +795,46 @@ case 'calculator_01':
   }
 
   Widget _buildClockPreview(Color textPrimary, Color textSecondary) {
-    return _LiveClockPreview(textPrimary: textPrimary, textSecondary: textSecondary);
+    return _LiveClockPreview(
+      textPrimary: textPrimary,
+      textSecondary: textSecondary,
+      is24Hour: _is24Hour,
+    );
   }
 
   Widget _buildAnalogClockPreview(Color textPrimary) {
-    final now = DateTime.now();
+    final now = DateTime(2026, 5, 15, 17, 30, 0);
+    final displayTime = _is24Hour
+        ? DateFormat('HH:mm').format(now)
+        : DateFormat('h:mm').format(now);
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text('ANALOG', style: NothingTheme.mono(fontSize: 7, color: NothingTheme.textSecondary)),
-            const SizedBox(height: 6),
-            Text(DateFormat('HH:mm').format(now), style: NothingTheme.grotesk(fontSize: 16, color: textPrimary, fontWeight: FontWeight.bold)),
-          ],
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text('ANALOG', style: NothingTheme.mono(fontSize: 7, color: NothingTheme.textSecondary)),
+              const SizedBox(height: 6),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  displayTime,
+                  style: NothingTheme.grotesk(fontSize: 16, color: textPrimary, fontWeight: FontWeight.bold),
+                ),
+              ),
+              if (!_is24Hour)
+                Text(
+                  DateFormat('a').format(now),
+                  style: NothingTheme.mono(fontSize: 8, color: NothingTheme.accent),
+                ),
+            ],
+          ),
         ),
+        const SizedBox(width: 8),
         Container(
           width: 44,
           height: 44,
@@ -710,9 +851,15 @@ case 'calculator_01':
   }
 
   Widget _buildBinaryClockPreview(Color textPrimary, Color textSecondary, Color borderColor) {
-    final now = DateTime.now();
-    final hour = now.hour;
+    final now = DateTime(2026, 5, 15, 17, 30, 0);
+    var hour = now.hour;
     final minute = now.minute;
+    String periodLabel = '';
+    if (!_is24Hour) {
+      periodLabel = hour >= 12 ? 'PM' : 'AM';
+      hour = hour % 12;
+      if (hour == 0) hour = 12;
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -738,7 +885,14 @@ case 'calculator_01':
               crossAxisAlignment: CrossAxisAlignment.end,
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Text('${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}', style: NothingTheme.grotesk(fontSize: 16, color: textPrimary, fontWeight: FontWeight.bold)),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerRight,
+                  child: Text(
+                    '${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}$periodLabel',
+                    style: NothingTheme.grotesk(fontSize: 14, color: textPrimary, fontWeight: FontWeight.bold),
+                  ),
+                ),
                 Text('DECIMAL', style: NothingTheme.mono(fontSize: 5, color: textSecondary)),
               ],
             ),
@@ -937,23 +1091,6 @@ case 'calculator_01':
             ),
           );
         }),
-      ],
-    );
-  }
-
-  Widget _buildAgendaPreview(Color textPrimary, Color textSecondary) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(
-          'TODAY',
-          style: NothingTheme.mono(fontSize: 10, color: textSecondary),
-        ),
-        const SizedBox(height: 8),
-        _buildEventItem('09:00', 'STANDUP', textPrimary, textSecondary),
-        _buildEventItem('11:00', 'DESIGN', textPrimary, textSecondary),
-        _buildEventItem('14:00', 'REVIEW', textPrimary, textSecondary),
       ],
     );
   }
@@ -1368,6 +1505,8 @@ case 'calculator_01':
 
   bool _isScreenTimeWidget(String widgetType) => widgetType.startsWith('screen_time_');
 
+  static const _permissionChannel = MethodChannel('permission_channel');
+
   Future<bool> _ensureUsageStatsPermission(BuildContext context) async {
     final granted = await _permissionChannel.invokeMethod<bool>('checkPermission', {'type': 'usage_stats'}) ?? false;
     if (granted) {
@@ -1574,204 +1713,96 @@ case 'calculator_01':
   }
 
   Widget _buildScreenTimeMinimalPreview(Color textPrimary, Color textSecondary, Color borderColor) {
-    return FutureBuilder<Map<String, dynamic>>(
-      future: _getScreenTimeData(),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return _buildScreenTimeLoadingPreview(textPrimary, textSecondary);
-        }
-
-        final hasPermission = snapshot.data?['hasPermission'] as bool? ?? false;
-        if (!hasPermission) {
-          return _buildScreenTimePermissionPreview(textPrimary, textSecondary);
-        }
-
-        final hours = snapshot.data?['hours'] as int? ?? 0;
-        final mins = snapshot.data?['minutes'] as int? ?? 0;
-        final progress = ((hours * 60 + mins) / 480.0).clamp(0.0, 1.0);
-        return Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              '${hours}H ${mins}M',
-              style: NothingTheme.doto(fontSize: 26, color: textPrimary),
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          '3H 42M',
+          style: NothingTheme.doto(fontSize: 26, color: textPrimary),
+        ),
+        const SizedBox(height: 8),
+        Text('SCREEN TIME', style: NothingTheme.mono(fontSize: 9, color: textSecondary)),
+        const SizedBox(height: 10),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(999),
+          child: SizedBox(
+            width: 96,
+            height: 4,
+            child: LinearProgressIndicator(
+              value: 0.46,
+              backgroundColor: borderColor,
+              valueColor: AlwaysStoppedAnimation(textPrimary),
             ),
-            const SizedBox(height: 8),
-            Text('SCREEN TIME', style: NothingTheme.mono(fontSize: 9, color: textSecondary)),
-            const SizedBox(height: 10),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(999),
-              child: SizedBox(
-                width: 96,
-                height: 4,
-                child: LinearProgressIndicator(
-                  value: progress,
-                  backgroundColor: borderColor,
-                  valueColor: AlwaysStoppedAnimation(textPrimary),
-                ),
-              ),
-            ),
-          ],
-        );
-      },
+          ),
+        ),
+      ],
     );
   }
 
   Widget _buildScreenTimeRingPreview(Color textPrimary, Color textSecondary, Color borderColor) {
-    return FutureBuilder<Map<String, dynamic>>(
-      future: _getScreenTimeData(),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return _buildScreenTimeLoadingPreview(textPrimary, textSecondary);
-        }
-
-        final hasPermission = snapshot.data?['hasPermission'] as bool? ?? false;
-        if (!hasPermission) {
-          return _buildScreenTimePermissionPreview(textPrimary, textSecondary);
-        }
-
-        final hours = snapshot.data?['hours'] as int? ?? 0;
-        final mins = snapshot.data?['minutes'] as int? ?? 0;
-        final pct = ((hours * 60 + mins) / 480.0 * 100).clamp(0, 100).toInt();
-        return Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Stack(
+          alignment: Alignment.center,
           children: [
-            Stack(
-              alignment: Alignment.center,
-              children: [
-                SizedBox(
-                  width: 86,
-                  height: 86,
-                  child: CircularProgressIndicator(
-                    value: pct / 100.0,
-                    strokeWidth: 6,
-                    backgroundColor: borderColor,
-                    valueColor: AlwaysStoppedAnimation(textPrimary),
-                  ),
-                ),
-                Text('$pct%', style: NothingTheme.mono(fontSize: 16, color: textPrimary)),
-              ],
+            SizedBox(
+              width: 86,
+              height: 86,
+              child: CircularProgressIndicator(
+                value: 0.46,
+                strokeWidth: 6,
+                backgroundColor: borderColor,
+                valueColor: AlwaysStoppedAnimation(textPrimary),
+              ),
             ),
-            const SizedBox(height: 8),
-            Text('TODAY', style: NothingTheme.mono(fontSize: 9, color: textSecondary)),
+            Text('46%', style: NothingTheme.mono(fontSize: 16, color: textPrimary)),
           ],
-        );
-      },
+        ),
+        const SizedBox(height: 8),
+        Text('TODAY', style: NothingTheme.mono(fontSize: 9, color: textSecondary)),
+      ],
     );
   }
 
   Widget _buildScreenTimeSplitPreview(Color textPrimary, Color textSecondary, Color borderColor) {
-    return FutureBuilder<Map<String, dynamic>>(
-      future: _getScreenTimeData(),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return _buildScreenTimeLoadingPreview(textPrimary, textSecondary);
-        }
-
-        final hasPermission = snapshot.data?['hasPermission'] as bool? ?? false;
-        if (!hasPermission) {
-          return _buildScreenTimePermissionPreview(textPrimary, textSecondary);
-        }
-
-        final hours = snapshot.data?['hours'] as int? ?? 0;
-        final mins = snapshot.data?['minutes'] as int? ?? 0;
-        final pct = ((hours * 60 + mins) / 480.0 * 100).clamp(0, 100).toInt();
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.center,
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Expanded(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('3H 42M', style: NothingTheme.doto(fontSize: 22, color: textPrimary)),
+              const SizedBox(height: 6),
+              Text('SCREEN TIME', style: NothingTheme.mono(fontSize: 8, color: textSecondary)),
+            ],
+          ),
+        ),
+        Stack(
+          alignment: Alignment.center,
           children: [
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('${hours}H ${mins}M', style: NothingTheme.doto(fontSize: 22, color: textPrimary)),
-                  const SizedBox(height: 6),
-                  Text('SCREEN TIME', style: NothingTheme.mono(fontSize: 8, color: textSecondary)),
-                ],
+            SizedBox(
+              width: 56,
+              height: 56,
+              child: CircularProgressIndicator(
+                value: 0.46,
+                strokeWidth: 5,
+                backgroundColor: borderColor,
+                valueColor: AlwaysStoppedAnimation(textPrimary),
               ),
             ),
-            Stack(
-              alignment: Alignment.center,
-              children: [
-                SizedBox(
-                  width: 56,
-                  height: 56,
-                  child: CircularProgressIndicator(
-                    value: pct / 100.0,
-                    strokeWidth: 5,
-                    backgroundColor: borderColor,
-                    valueColor: AlwaysStoppedAnimation(textPrimary),
-                  ),
-                ),
-                Text('$pct%', style: NothingTheme.mono(fontSize: 11, color: textPrimary)),
-              ],
-            ),
+            Text('46%', style: NothingTheme.mono(fontSize: 11, color: textPrimary)),
           ],
-        );
-      },
+        ),
+      ],
     );
   }
 
   /// Reads today's screen time from the platform channel.
   /// Uses the same Android reader as the actual widget to keep previews in sync.
-  static const _permissionChannel = MethodChannel('permission_channel');
-  static const _widgetChannel = MethodChannel('widget_channel');
-
-  Future<Map<String, dynamic>> _getScreenTimeData() async {
-    try {
-      final data = await _widgetChannel.invokeMethod<Map<dynamic, dynamic>>('getScreenTimeStats');
-      if (data == null) {
-        return const {'hasPermission': false, 'hours': 0, 'minutes': 0};
-      }
-
-      return {
-        'hasPermission': data['hasPermission'] == true,
-        'totalMillis': (data['totalMillis'] as num?)?.toInt() ?? 0,
-        'hours': (data['hours'] as num?)?.toInt() ?? 0,
-        'minutes': (data['minutes'] as num?)?.toInt() ?? 0,
-        'topAppLabel': data['topAppLabel']?.toString(),
-      };
-    } catch (_) {
-      return const {'hasPermission': false, 'hours': 0, 'minutes': 0};
-    }
-  }
-
-  Widget _buildScreenTimeLoadingPreview(Color textPrimary, Color textSecondary) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        SizedBox(
-          width: 22,
-          height: 22,
-          child: CircularProgressIndicator(
-            strokeWidth: 2,
-            valueColor: AlwaysStoppedAnimation(textPrimary),
-          ),
-        ),
-        const SizedBox(height: 10),
-        Text('CHECKING', style: NothingTheme.mono(fontSize: 9, color: textSecondary)),
-      ],
-    );
-  }
-
-  Widget _buildScreenTimePermissionPreview(Color textPrimary, Color textSecondary) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(
-          'ENABLE',
-          style: NothingTheme.mono(fontSize: 12, color: textPrimary),
-        ),
-        const SizedBox(height: 6),
-        Text(
-          'USAGE ACCESS',
-          style: NothingTheme.mono(fontSize: 9, color: textSecondary),
-        ),
-      ],
-    );
-  }
-
   Widget _buildSpinnerPreview(Color textPrimary, Color textSecondary) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -2186,9 +2217,10 @@ class _AnalogClockPainter extends CustomPainter {
       canvas.drawCircle(Offset(mx, my), markerRadius, paint);
     }
 
-    final now = DateTime.now();
-    final hourAngle = ((now.hour % 12 + now.minute / 60) * 30 - 90) * math.pi / 180;
-    final minuteAngle = ((now.minute + now.second / 60) * 6 - 90) * math.pi / 180;
+    final hour = 5;
+    final minute = 30;
+    final hourAngle = ((hour % 12 + minute / 60) * 30 - 90) * math.pi / 180;
+    final minuteAngle = (minute * 6 - 90) * math.pi / 180;
 
     paint.style = PaintingStyle.stroke;
     paint.strokeCap = StrokeCap.round;
@@ -2396,39 +2428,21 @@ class _DotMatrixPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
 
-class _LiveClockPreview extends StatefulWidget {
+class _LiveClockPreview extends StatelessWidget {
   final Color textPrimary;
   final Color textSecondary;
+  final bool is24Hour;
 
-  const _LiveClockPreview({required this.textPrimary, required this.textSecondary});
-
-  @override
-  State<_LiveClockPreview> createState() => _LiveClockPreviewState();
-}
-
-class _LiveClockPreviewState extends State<_LiveClockPreview> {
-  late DateTime _currentTime;
-  late Timer _timer;
-
-  @override
-  void initState() {
-    super.initState();
-    _currentTime = DateTime.now();
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      setState(() {
-        _currentTime = DateTime.now();
-      });
-    });
-  }
-
-  @override
-  void dispose() {
-    _timer.cancel();
-    super.dispose();
-  }
+  const _LiveClockPreview({required this.textPrimary, required this.textSecondary, required this.is24Hour});
 
   @override
   Widget build(BuildContext context) {
+    final now = DateTime(2026, 5, 15, 17, 30, 0);
+    final hour = is24Hour ? now.hour : (now.hour % 12 == 0 ? 12 : now.hour % 12);
+    final minute = now.minute.toString().padLeft(2, '0');
+    final period = is24Hour ? '' : (now.hour >= 12 ? 'PM' : 'AM');
+    final dotMatrixTime = '${hour.toString().padLeft(2, '0')}:$minute';
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -2438,9 +2452,13 @@ class _LiveClockPreviewState extends State<_LiveClockPreview> {
           children: [
             Text(
               'TIME',
-              style: NothingTheme.mono(fontSize: 7, color: widget.textSecondary),
+              style: NothingTheme.mono(fontSize: 7, color: textSecondary),
             ),
-            Icon(Icons.history, size: 10, color: widget.textSecondary),
+            if (period.isNotEmpty)
+              Text(
+                period,
+                style: NothingTheme.mono(fontSize: 7, color: NothingTheme.accent),
+              ),
           ],
         ),
         Center(
@@ -2448,15 +2466,15 @@ class _LiveClockPreviewState extends State<_LiveClockPreview> {
             height: 42,
             child: CustomPaint(
               painter: _DotMatrixPainter(
-                text: DateFormat('HH:mm').format(_currentTime),
-                color: widget.textPrimary,
+                text: dotMatrixTime,
+                color: textPrimary,
               ),
             ),
           ),
         ),
         Text(
-          DateFormat('EEEE, MMM d').format(_currentTime).toUpperCase(),
-          style: NothingTheme.mono(fontSize: 7, color: widget.textPrimary),
+          'FRIDAY, MAY 15',
+          style: NothingTheme.mono(fontSize: 7, color: textPrimary),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),

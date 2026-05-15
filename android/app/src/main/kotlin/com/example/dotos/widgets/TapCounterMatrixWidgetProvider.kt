@@ -25,28 +25,13 @@ class TapCounterMatrixWidgetProvider : AppWidgetProvider() {
             val prefs = context.getSharedPreferences("tap_counter", Context.MODE_PRIVATE)
             val count = prefs.getInt("count", 0) + 1
             prefs.edit().putInt("count", count).apply()
-
-            val appWidgetManager = AppWidgetManager.getInstance(context)
-            updateAllInstances(context, appWidgetManager)
+            WidgetUpdateBroadcaster.refreshTapCounters(context)
         }
     }
 
-    private fun updateAllInstances(context: Context, appWidgetManager: AppWidgetManager) {
-        val providers = arrayOf(
-            TapCounterWidgetProvider::class.java,
-            TapCounterDialWidgetProvider::class.java,
-            TapCounterMatrixWidgetProvider::class.java
-        )
-        for (provider in providers) {
-            val ids = appWidgetManager.getAppWidgetIds(ComponentName(context, provider))
-            for (id in ids) {
-                when (provider) {
-                    TapCounterWidgetProvider::class.java -> TapCounterWidgetProvider.updateAppWidget(context, appWidgetManager, id)
-                    TapCounterDialWidgetProvider::class.java -> TapCounterDialWidgetProvider.updateAppWidget(context, appWidgetManager, id)
-                    TapCounterMatrixWidgetProvider::class.java -> updateAppWidget(context, appWidgetManager, id)
-                }
-            }
-        }
+    override fun onDeleted(context: Context, appWidgetIds: IntArray) {
+        super.onDeleted(context, appWidgetIds)
+        for (id in appWidgetIds) { WidgetTheme.removeWidgetTheme(context, id) }
     }
 
     companion object {
@@ -56,7 +41,7 @@ class TapCounterMatrixWidgetProvider : AppWidgetProvider() {
             val prefs = context.getSharedPreferences("tap_counter", Context.MODE_PRIVATE)
             val count = prefs.getInt("count", 0)
             
-            val bitmap = renderMatrixWidget(context, count)
+            val bitmap = renderMatrixWidget(context, count, appWidgetId)
             views.setImageViewBitmap(R.id.widget_image, bitmap)
 
             val intent = Intent(context, TapCounterMatrixWidgetProvider::class.java).apply {
@@ -71,13 +56,13 @@ class TapCounterMatrixWidgetProvider : AppWidgetProvider() {
             appWidgetManager.updateAppWidget(appWidgetId, views)
         }
 
-        private fun renderMatrixWidget(context: Context, count: Int): Bitmap {
+        private fun renderMatrixWidget(context: Context, count: Int, appWidgetId: Int): Bitmap {
             val size = 400
             val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
             val canvas = Canvas(bitmap)
             val paint = Paint().apply { isAntiAlias = true }
 
-            val palette = WidgetTheme.palette(context)
+            val palette = WidgetTheme.paletteForWidget(context, appWidgetId, "tap_counter")
 
             // Background
             paint.color = palette.background

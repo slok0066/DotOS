@@ -4,12 +4,18 @@ import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.widget.RemoteViews
 import com.example.dotos.R
 import java.util.Stack
 
 class CalculatorWidgetProvider : AppWidgetProvider() {
     
+    override fun onDeleted(context: Context, appWidgetIds: IntArray) {
+        super.onDeleted(context, appWidgetIds)
+        for (id in appWidgetIds) { WidgetTheme.removeWidgetTheme(context, id) }
+    }
+
     companion object {
         private const val PREFS_NAME = "calculator_prefs"
         private const val ACTION_PREFIX = "com.example.dotos.action.CALC"
@@ -218,7 +224,49 @@ class CalculatorWidgetProvider : AppWidgetProvider() {
         val expression = prefs.getString(getExpressionKey(appWidgetId), "") ?: ""
         val result = prefs.getString(getResultKey(appWidgetId), "0") ?: "0"
         
+        val palette = WidgetTheme.paletteForWidget(context, appWidgetId, "calculator")
+        
         val views = RemoteViews(context.packageName, R.layout.widget_calculator_layout)
+        
+        // Apply theme colors
+        views.setInt(R.id.calc_root, "setBackgroundColor", palette.background)
+        views.setInt(R.id.calc_expression, "setTextColor", palette.secondary)
+        views.setInt(R.id.calc_result, "setTextColor", palette.primary)
+        
+        // Apply button backgrounds based on theme
+        val isLight = WidgetTheme.widgetTheme(context, appWidgetId, "calculator") == WidgetTheme.THEME_LIGHT
+        val buttonBg = if (isLight) R.drawable.calc_button_bg_light else R.drawable.calc_button_bg
+        val allButtonIds = listOf(
+            R.id.calc_btn_0, R.id.calc_btn_1, R.id.calc_btn_2, R.id.calc_btn_3,
+            R.id.calc_btn_4, R.id.calc_btn_5, R.id.calc_btn_6, R.id.calc_btn_7,
+            R.id.calc_btn_8, R.id.calc_btn_9, R.id.calc_btn_dot, R.id.calc_backspace,
+            R.id.calc_btn_add, R.id.calc_btn_sub, R.id.calc_btn_mul, R.id.calc_btn_div, R.id.calc_clear
+        )
+        for (btnId in allButtonIds) {
+            views.setInt(btnId, "setBackgroundResource", buttonBg)
+        }
+        
+        // Number buttons text color
+        val numberButtonIds = listOf(
+            R.id.calc_btn_0, R.id.calc_btn_1, R.id.calc_btn_2, R.id.calc_btn_3,
+            R.id.calc_btn_4, R.id.calc_btn_5, R.id.calc_btn_6, R.id.calc_btn_7,
+            R.id.calc_btn_8, R.id.calc_btn_9, R.id.calc_btn_dot, R.id.calc_backspace
+        )
+        for (btnId in numberButtonIds) {
+            views.setInt(btnId, "setTextColor", palette.primary)
+        }
+        
+        // Operator buttons text color (accent)
+        val operatorButtonIds = listOf(
+            R.id.calc_btn_add, R.id.calc_btn_sub, R.id.calc_btn_mul, R.id.calc_btn_div, R.id.calc_clear
+        )
+        for (btnId in operatorButtonIds) {
+            views.setInt(btnId, "setTextColor", palette.accent)
+        }
+        
+        // Equals button text color
+        views.setInt(R.id.calc_btn_equals, "setTextColor", palette.background)
+        
         views.setTextViewText(R.id.calc_expression, expression)
         views.setTextViewText(R.id.calc_result, result)
         

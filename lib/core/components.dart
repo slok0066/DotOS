@@ -24,7 +24,12 @@ class NothingCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return EntranceAnimation(
       child: GestureDetector(
-        onTap: onTap,
+        onTap: () {
+          if (onTap != null) {
+            HapticFeedback.lightImpact();
+            onTap!();
+          }
+        },
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           curve: Curves.easeOut,
@@ -144,7 +149,12 @@ class NothingButton extends StatelessWidget {
     final isDisabled = onTap == null;
     
     return GestureDetector(
-      onTap: onTap,
+      onTap: () {
+        if (onTap != null) {
+          HapticFeedback.mediumImpact();
+          onTap!();
+        }
+      },
       child: Container(
         height: 56,
         padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -185,16 +195,6 @@ class WidgetService {
     } on PlatformException catch (e) {
       debugPrint("Failed to add widget: '${e.message}'.");
       return false;
-    }
-  }
-
-  static Future<void> setWidgetTheme(String theme) async {
-    try {
-      await _channel.invokeMethod<void>('setWidgetTheme', {
-        'theme': theme,
-      });
-    } on PlatformException catch (e) {
-      debugPrint("Failed to set widget theme: '${e.message}'.");
     }
   }
 }

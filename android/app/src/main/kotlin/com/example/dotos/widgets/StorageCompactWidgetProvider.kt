@@ -23,10 +23,15 @@ class StorageCompactWidgetProvider : AppWidgetProvider() {
         }
     }
 
+    override fun onDeleted(context: Context, appWidgetIds: IntArray) {
+        super.onDeleted(context, appWidgetIds)
+        for (id in appWidgetIds) { WidgetTheme.removeWidgetTheme(context, id) }
+    }
+
     companion object {
         fun updateAppWidget(context: Context, appWidgetManager: AppWidgetManager, appWidgetId: Int) {
             val views = RemoteViews(context.packageName, R.layout.widget_layout)
-            val bitmap = renderCompactStorage(context)
+            val bitmap = renderCompactStorage(context, appWidgetId)
             views.setImageViewBitmap(R.id.widget_image, bitmap)
 
             val intent = Intent(context, MainActivity::class.java)
@@ -39,8 +44,8 @@ class StorageCompactWidgetProvider : AppWidgetProvider() {
             appWidgetManager.updateAppWidget(appWidgetId, views)
         }
 
-        private fun renderCompactStorage(context: Context): Bitmap {
-            val palette = WidgetTheme.palette(context)
+        private fun renderCompactStorage(context: Context, appWidgetId: Int): Bitmap {
+            val palette = WidgetTheme.paletteForWidget(context, appWidgetId, "storage")
             val size = 400
             val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
             val canvas = Canvas(bitmap)

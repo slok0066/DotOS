@@ -32,8 +32,8 @@ class MainActivity : FlutterActivity() {
             if (call.method == "addWidget") {
                 val type = call.argument<String>("type")
                 val theme = call.argument<String>("theme") ?: call.argument<String>("themeMode")
-                if (theme != null) {
-                    WidgetTheme.saveTheme(this, theme)
+                if (theme != null && type != null) {
+                    WidgetTheme.saveCategoryTheme(this, type, theme)
                 }
                 val success = requestPinWidget(type)
                 result.success(success)
@@ -80,55 +80,10 @@ class MainActivity : FlutterActivity() {
     }
 
     private fun refreshAllWidgets() {
-        val providers = arrayOf(
-            ClockWidgetProvider::class.java,
-            ClockAnalogWidgetProvider::class.java,
-            ClockBinaryWidgetProvider::class.java,
-            CalendarWidgetProvider::class.java,
-            CalendarWeekWidgetProvider::class.java,
-            CalendarMonthWidgetProvider::class.java,
-            CalendarEventListWidgetProvider::class.java,
-            CalendarAgendaWidgetProvider::class.java,
-            BatteryWidgetProvider::class.java,
-            BatteryMinimalWidgetProvider::class.java,
-            BatteryDetailedWidgetProvider::class.java,
-            BatteryCircularWidgetProvider::class.java,
-            BatteryBarsWidgetProvider::class.java,
-            StorageWidgetProvider::class.java,
-            StorageCompactWidgetProvider::class.java,
-            StorageCircularWidgetProvider::class.java,
-            StorageAnalysisWidgetProvider::class.java,
-            StorageDetailedWidgetProvider::class.java,
-            CalculatorWidgetProvider::class.java,
-            TapCounterWidgetProvider::class.java,
-            TapCounterDialWidgetProvider::class.java,
-            TapCounterMatrixWidgetProvider::class.java,
-            ScreenTimeMinimalWidgetProvider::class.java,
-            ScreenTimeRingWidgetProvider::class.java,
-            ScreenTimeSplitWidgetProvider::class.java,
-            SoundWidgetProvider::class.java,
-            SoundSegmentsWidgetProvider::class.java,
-            SoundDialWidgetProvider::class.java,
-            SpinnerWidgetProvider::class.java,
-            BottleSpinWidgetProvider::class.java,
-            DiceRollWidgetProvider::class.java,
-            DinoGameWidgetProvider::class.java,
-            CoinFlipWidgetProvider::class.java,
-            MusicVinylWidgetProvider::class.java
-        )
-
-        val appWidgetManager = AppWidgetManager.getInstance(this)
-        for (provider in providers) {
-            val componentName = ComponentName(this, provider)
-            val ids = appWidgetManager.getAppWidgetIds(componentName)
-            if (ids.isNotEmpty()) {
-                val updateIntent = Intent(this, provider).apply {
-                    action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
-                    putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
-                }
-                sendBroadcast(updateIntent)
-            }
-        }
+        // Delegate to the central broadcaster — updates ALL instances of ALL widget types
+        WidgetUpdateBroadcaster.refreshAll(this)
+        // Also refresh screen time via its dedicated updater
+        ScreenTimeWidgetUpdater.refreshAll(this)
     }
 
     override fun onResume() {

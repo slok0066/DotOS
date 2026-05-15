@@ -134,6 +134,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with WidgetsBinding
   }
 
   Future<void> _requestPermission(String permissionType) async {
+    HapticFeedback.mediumImpact();
     try {
       final bool granted = await platform.invokeMethod('requestPermission', {
         'type': permissionType,
@@ -146,6 +147,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with WidgetsBinding
         
         final isSettingsNav = permissionType == 'sound' || permissionType == 'usage_stats';
         if (granted) {
+          HapticFeedback.heavyImpact();
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
@@ -193,6 +195,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with WidgetsBinding
   }
 
   void _nextPage() {
+    HapticFeedback.lightImpact();
     if (_currentPage < _pages.length - 1) {
       _pageController.nextPage(
         duration: const Duration(milliseconds: 300),
@@ -204,6 +207,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with WidgetsBinding
   }
 
   void _skipOnboarding() {
+    HapticFeedback.lightImpact();
     _completeOnboarding();
   }
 
@@ -285,6 +289,31 @@ class _OnboardingScreenState extends State<OnboardingScreen> with WidgetsBinding
                 padding: const EdgeInsets.all(NothingTheme.spaceLG),
                 child: Column(
                   children: [
+                    // Empty permission state warning
+                    if (_currentPage > 0 && _pages.sublist(1, _currentPage + 1).every(
+                          (page) => page.permissionType == null || permissionStatus[page.permissionType] == false,
+                        ))
+                      Container(
+                        margin: const EdgeInsets.only(bottom: NothingTheme.spaceMD),
+                        padding: const EdgeInsets.all(NothingTheme.spaceMD),
+                        decoration: BoxDecoration(
+                          color: NothingTheme.warning.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: NothingTheme.warning, width: 1),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.warning_amber_outlined, size: 20, color: NothingTheme.warning),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                'Some features may not work without permissions. You can continue and grant them later in settings.',
+                                style: NothingTheme.mono(fontSize: 10, color: NothingTheme.warning),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     if (_pages[_currentPage].permissionType != null)
                       Padding(
                         padding: const EdgeInsets.only(bottom: NothingTheme.spaceMD),

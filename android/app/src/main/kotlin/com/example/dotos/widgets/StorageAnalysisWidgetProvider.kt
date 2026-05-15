@@ -23,10 +23,15 @@ class StorageAnalysisWidgetProvider : AppWidgetProvider() {
         }
     }
 
+    override fun onDeleted(context: Context, appWidgetIds: IntArray) {
+        super.onDeleted(context, appWidgetIds)
+        for (id in appWidgetIds) { WidgetTheme.removeWidgetTheme(context, id) }
+    }
+
     companion object {
         fun updateAppWidget(context: Context, appWidgetManager: AppWidgetManager, appWidgetId: Int) {
             val views = RemoteViews(context.packageName, R.layout.widget_layout)
-            val bitmap = renderAnalysisStorage(context)
+            val bitmap = renderAnalysisStorage(context, appWidgetId)
             views.setImageViewBitmap(R.id.widget_image, bitmap)
 
             val intent = Intent(context, MainActivity::class.java)
@@ -41,8 +46,8 @@ class StorageAnalysisWidgetProvider : AppWidgetProvider() {
             appWidgetManager.updateAppWidget(appWidgetId, views)
         }
 
-        private fun renderAnalysisStorage(context: Context): Bitmap {
-            val palette = WidgetTheme.palette(context)
+        private fun renderAnalysisStorage(context: Context, appWidgetId: Int): Bitmap {
+            val palette = WidgetTheme.paletteForWidget(context, appWidgetId, "storage")
             val size = 400
             val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
             val canvas = Canvas(bitmap)

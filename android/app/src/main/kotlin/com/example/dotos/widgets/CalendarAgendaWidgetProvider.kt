@@ -28,10 +28,15 @@ class CalendarAgendaWidgetProvider : AppWidgetProvider() {
         }
     }
 
+    override fun onDeleted(context: Context, appWidgetIds: IntArray) {
+        super.onDeleted(context, appWidgetIds)
+        for (id in appWidgetIds) { WidgetTheme.removeWidgetTheme(context, id) }
+    }
+
     companion object {
         fun updateAppWidget(context: Context, appWidgetManager: AppWidgetManager, appWidgetId: Int) {
             val views = RemoteViews(context.packageName, R.layout.widget_layout)
-            val bitmap = renderAgenda(context)
+            val bitmap = renderAgenda(context, appWidgetId)
             views.setImageViewBitmap(R.id.widget_image, bitmap)
 
             val intent = Intent(context, MainActivity::class.java)
@@ -44,7 +49,7 @@ class CalendarAgendaWidgetProvider : AppWidgetProvider() {
             appWidgetManager.updateAppWidget(appWidgetId, views)
         }
 
-        private fun renderAgenda(context: Context): Bitmap {
+        private fun renderAgenda(context: Context, appWidgetId: Int): Bitmap {
             // 4x2 Wide widget - 800x400
             val width = 800
             val height = 400
@@ -53,7 +58,7 @@ class CalendarAgendaWidgetProvider : AppWidgetProvider() {
             val paint = Paint().apply { isAntiAlias = true }
 
             // Palette
-            val palette = WidgetTheme.palette(context)
+            val palette = WidgetTheme.paletteForWidget(context, appWidgetId, "calendar")
 
             // Background
             paint.color = palette.background

@@ -60,7 +60,7 @@ class BatteryBarsWidgetProvider : AppWidgetProvider() {
         val isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING || 
                         status == BatteryManager.BATTERY_STATUS_FULL
         
-        val bitmap = renderBatteryBars(context, batteryPct, isCharging)
+        val bitmap = renderBatteryBars(context, batteryPct, isCharging, appWidgetId)
         views.setImageViewBitmap(R.id.widget_image, bitmap)
         
         val intent = Intent(context, MainActivity::class.java)
@@ -73,9 +73,14 @@ class BatteryBarsWidgetProvider : AppWidgetProvider() {
         appWidgetManager.updateAppWidget(appWidgetId, views)
     }
 
+    override fun onDeleted(context: Context, appWidgetIds: IntArray) {
+        super.onDeleted(context, appWidgetIds)
+        for (id in appWidgetIds) { WidgetTheme.removeWidgetTheme(context, id) }
+    }
+
     companion object {
-        private fun renderBatteryBars(context: Context, batteryPct: Int, isCharging: Boolean): Bitmap {
-            val palette = WidgetTheme.palette(context)
+        private fun renderBatteryBars(context: Context, batteryPct: Int, isCharging: Boolean, appWidgetId: Int): Bitmap {
+            val palette = WidgetTheme.paletteForWidget(context, appWidgetId, "battery")
             val width = 800
             val height = 400
             val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)

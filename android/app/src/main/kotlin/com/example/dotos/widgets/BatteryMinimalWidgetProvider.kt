@@ -50,10 +50,15 @@ class BatteryMinimalWidgetProvider : AppWidgetProvider() {
         }
     }
 
+    override fun onDeleted(context: Context, appWidgetIds: IntArray) {
+        super.onDeleted(context, appWidgetIds)
+        for (id in appWidgetIds) { WidgetTheme.removeWidgetTheme(context, id) }
+    }
+
     companion object {
         fun updateAppWidget(context: Context, appWidgetManager: AppWidgetManager, appWidgetId: Int) {
             val views = RemoteViews(context.packageName, R.layout.widget_layout)
-            val bitmap = renderMinimalBattery(context)
+            val bitmap = renderMinimalBattery(context, appWidgetId)
             views.setImageViewBitmap(R.id.widget_image, bitmap)
 
             val intent = Intent(context, MainActivity::class.java)
@@ -66,8 +71,8 @@ class BatteryMinimalWidgetProvider : AppWidgetProvider() {
             appWidgetManager.updateAppWidget(appWidgetId, views)
         }
 
-        private fun renderMinimalBattery(context: Context): Bitmap {
-            val palette = WidgetTheme.palette(context)
+        private fun renderMinimalBattery(context: Context, appWidgetId: Int): Bitmap {
+            val palette = WidgetTheme.paletteForWidget(context, appWidgetId, "battery")
             // 2x2 Square widget - 400x400
             val size = 400
             val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)

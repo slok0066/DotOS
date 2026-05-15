@@ -124,6 +124,11 @@ class SpinnerWidgetProvider : AppWidgetProvider() {
         }
     }
 
+    override fun onDeleted(context: Context, appWidgetIds: IntArray) {
+        super.onDeleted(context, appWidgetIds)
+        for (id in appWidgetIds) { WidgetTheme.removeWidgetTheme(context, id) }
+    }
+
     companion object {
         private val SPINNER_PROVIDERS = arrayOf(SpinnerWidgetProvider::class.java)
         private val SEGMENTS = arrayOf("1", "2", "3", "4", "5", "6")
@@ -181,8 +186,8 @@ class SpinnerWidgetProvider : AppWidgetProvider() {
             val prefs = context.getSharedPreferences("spinner", Context.MODE_PRIVATE)
             val segment = animatedSegment ?: prefs.getInt("segment", 0)
             val rotation = animatedRotation ?: prefs.getFloat("rotation", 0f)
-            val palette = WidgetTheme.palette(context)
-            val bitmap = renderSpinner(context, segment, rotation, energy, palette)
+            val palette = WidgetTheme.paletteForWidget(context, appWidgetId, "games")
+            val bitmap = renderSpinner(context, segment, rotation, energy, palette, appWidgetId)
             views.setImageViewBitmap(R.id.widget_image, bitmap)
             val intent = Intent(context, SpinnerWidgetProvider::class.java).apply { action = "ACTION_SPIN" }
             val pendingIntent = PendingIntent.getBroadcast(context, appWidgetId, intent,
@@ -191,7 +196,7 @@ class SpinnerWidgetProvider : AppWidgetProvider() {
             appWidgetManager.updateAppWidget(appWidgetId, views)
         }
 
-        private fun renderSpinner(context: Context, segment: Int, rotation: Float, energy: Float, palette: WidgetTheme.Palette): Bitmap {
+        private fun renderSpinner(context: Context, segment: Int, rotation: Float, energy: Float, palette: WidgetTheme.Palette, appWidgetId: Int): Bitmap {
             val size = 400
             val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
             val canvas = Canvas(bitmap)
@@ -337,8 +342,8 @@ class BottleSpinWidgetProvider : AppWidgetProvider() {
             val prefs = context.getSharedPreferences("bottle_spin", Context.MODE_PRIVATE)
             val rotation = animatedRotation ?: prefs.getFloat("rotation", 0f)
             val target = animatedTarget ?: prefs.getInt("target", 0)
-            val palette = WidgetTheme.palette(context)
-            val bitmap = renderBottle(context, rotation, target, energy, palette)
+            val palette = WidgetTheme.paletteForWidget(context, appWidgetId, "games")
+            val bitmap = renderBottle(context, rotation, target, energy, palette, appWidgetId)
             views.setImageViewBitmap(R.id.widget_image, bitmap)
             val intent = Intent(context, BottleSpinWidgetProvider::class.java).apply { action = "ACTION_BOTTLE_SPIN" }
             val pendingIntent = PendingIntent.getBroadcast(context, appWidgetId, intent,
@@ -347,7 +352,7 @@ class BottleSpinWidgetProvider : AppWidgetProvider() {
             appWidgetManager.updateAppWidget(appWidgetId, views)
         }
 
-        private fun renderBottle(context: Context, rotation: Float, target: Int, energy: Float, palette: WidgetTheme.Palette): Bitmap {
+        private fun renderBottle(context: Context, rotation: Float, target: Int, energy: Float, palette: WidgetTheme.Palette, appWidgetId: Int): Bitmap {
             val size = 400
             val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
             val canvas = Canvas(bitmap)
@@ -467,8 +472,8 @@ class DiceRollWidgetProvider : AppWidgetProvider() {
             val prefs = context.getSharedPreferences("dice", Context.MODE_PRIVATE)
             val value = animatedValue ?: prefs.getInt("value", 1)
             val rolls = animatedRolls ?: prefs.getInt("rolls", 0)
-            val palette = WidgetTheme.palette(context)
-            val bitmap = renderDice(context, value, rolls, rotation, energy, palette)
+            val palette = WidgetTheme.paletteForWidget(context, appWidgetId, "games")
+            val bitmap = renderDice(context, value, rolls, rotation, energy, palette, appWidgetId)
             views.setImageViewBitmap(R.id.widget_image, bitmap)
             val intent = Intent(context, DiceRollWidgetProvider::class.java).apply { action = "ACTION_ROLL" }
             val pendingIntent = PendingIntent.getBroadcast(context, appWidgetId, intent,
@@ -477,7 +482,7 @@ class DiceRollWidgetProvider : AppWidgetProvider() {
             appWidgetManager.updateAppWidget(appWidgetId, views)
         }
 
-        private fun renderDice(context: Context, value: Int, rolls: Int, rotation: Float, energy: Float, palette: WidgetTheme.Palette): Bitmap {
+        private fun renderDice(context: Context, value: Int, rolls: Int, rotation: Float, energy: Float, palette: WidgetTheme.Palette, appWidgetId: Int): Bitmap {
             val size = 400
             val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
             val canvas = Canvas(bitmap)
@@ -608,8 +613,8 @@ class DinoGameWidgetProvider : AppWidgetProvider() {
 
         fun updateAppWidget(context: Context, appWidgetManager: AppWidgetManager, appWidgetId: Int) {
             val views = RemoteViews(context.packageName, R.layout.widget_layout)
-            val palette = WidgetTheme.palette(context)
-            views.setImageViewBitmap(R.id.widget_image, renderDinoLauncher(palette))
+            val palette = WidgetTheme.paletteForWidget(context, appWidgetId, "games")
+            views.setImageViewBitmap(R.id.widget_image, renderDinoLauncher(palette, appWidgetId))
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://chromedino.com/")).apply {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
@@ -623,7 +628,7 @@ class DinoGameWidgetProvider : AppWidgetProvider() {
             appWidgetManager.updateAppWidget(appWidgetId, views)
         }
 
-        private fun renderDinoLauncher(palette: WidgetTheme.Palette): Bitmap {
+        private fun renderDinoLauncher(palette: WidgetTheme.Palette, appWidgetId: Int): Bitmap {
             val size = 400
             val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
             val canvas = Canvas(bitmap)
@@ -736,8 +741,8 @@ class DinoGameWidgetProvider : AppWidgetProvider() {
             val dinoY = animatedDinoY ?: prefs.getInt("dino_y", 260)
             val isJumping = animatedState != null && animatedJumping || prefs.getBoolean("is_jumping", false)
             val frame = if (animatedState != null) runningFrame else prefs.getInt("jump_frame", 0)
-            val palette = WidgetTheme.palette(context)
-            val bitmap = renderDinoGame(context, state, score, obstacleX, dinoY, isJumping, frame, palette)
+            val palette = WidgetTheme.paletteForWidget(context, appWidgetId, "games")
+            val bitmap = renderDinoGame(context, state, score, obstacleX, dinoY, isJumping, frame, palette, appWidgetId)
             views.setImageViewBitmap(R.id.widget_image, bitmap)
             val intent = Intent(context, DinoGameWidgetProvider::class.java).apply { action = "ACTION_DINO_JUMP" }
             val pendingIntent = PendingIntent.getBroadcast(context, appWidgetId, intent,
@@ -746,7 +751,7 @@ class DinoGameWidgetProvider : AppWidgetProvider() {
             appWidgetManager.updateAppWidget(appWidgetId, views)
         }
 
-        private fun renderDinoGame(context: Context, state: Int, score: Int, obstacleX: Int, dinoY: Int, isJumping: Boolean, runningFrame: Int, palette: WidgetTheme.Palette): Bitmap {
+        private fun renderDinoGame(context: Context, state: Int, score: Int, obstacleX: Int, dinoY: Int, isJumping: Boolean, runningFrame: Int, palette: WidgetTheme.Palette, appWidgetId: Int): Bitmap {
             val w = 400
             val h = 700
             val bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
@@ -905,11 +910,11 @@ class CoinFlipWidgetProvider : AppWidgetProvider() {
 
         fun updateAppWidget(context: Context, appWidgetManager: AppWidgetManager, appWidgetId: Int, animatedRotation: Float?) {
             val views = RemoteViews(context.packageName, R.layout.widget_layout)
-            val palette = WidgetTheme.palette(context)
+            val palette = WidgetTheme.paletteForWidget(context, appWidgetId, "games")
             val prefs = context.getSharedPreferences("coin_flip", Context.MODE_PRIVATE)
             val rotation = animatedRotation ?: if (prefs.getBoolean("isHeads", true)) 0f else 180f
             
-            views.setImageViewBitmap(R.id.widget_image, renderCoin(context, rotation, palette))
+            views.setImageViewBitmap(R.id.widget_image, renderCoin(context, rotation, palette, appWidgetId))
             
             val intent = Intent(context, CoinFlipWidgetProvider::class.java).apply { action = "ACTION_COIN_FLIP" }
             val pendingIntent = PendingIntent.getBroadcast(
@@ -920,7 +925,7 @@ class CoinFlipWidgetProvider : AppWidgetProvider() {
             appWidgetManager.updateAppWidget(appWidgetId, views)
         }
 
-        private fun renderCoin(context: Context, rotationX: Float, palette: WidgetTheme.Palette): Bitmap {
+        private fun renderCoin(context: Context, rotationX: Float, palette: WidgetTheme.Palette, appWidgetId: Int): Bitmap {
             val w = 400
             val h = 400
             val bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)

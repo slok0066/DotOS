@@ -34,7 +34,7 @@ class StorageCircularWidgetProvider : AppWidgetProvider() {
         val gbTotal = bytesTotal / (1024.0 * 1024.0 * 1024.0)
         val usagePercent = ((bytesTotal - bytesAvailable).toFloat() / bytesTotal.toFloat())
         
-        val bitmap = renderCircularStorage(context, gbUsed, gbTotal, usagePercent)
+        val bitmap = renderCircularStorage(context, gbUsed, gbTotal, usagePercent, appWidgetId)
         views.setImageViewBitmap(R.id.widget_image, bitmap)
         
         val intent = Intent(context, MainActivity::class.java)
@@ -47,9 +47,14 @@ class StorageCircularWidgetProvider : AppWidgetProvider() {
         appWidgetManager.updateAppWidget(appWidgetId, views)
     }
 
+    override fun onDeleted(context: Context, appWidgetIds: IntArray) {
+        super.onDeleted(context, appWidgetIds)
+        for (id in appWidgetIds) { WidgetTheme.removeWidgetTheme(context, id) }
+    }
+
     companion object {
-        private fun renderCircularStorage(context: Context, gbUsed: Double, gbTotal: Double, usagePercent: Float): Bitmap {
-            val palette = WidgetTheme.palette(context)
+        private fun renderCircularStorage(context: Context, gbUsed: Double, gbTotal: Double, usagePercent: Float, appWidgetId: Int): Bitmap {
+            val palette = WidgetTheme.paletteForWidget(context, appWidgetId, "storage")
             val width = 800
             val height = 400
             val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)

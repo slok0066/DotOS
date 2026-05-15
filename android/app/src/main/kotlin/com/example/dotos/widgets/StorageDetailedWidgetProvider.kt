@@ -23,10 +23,15 @@ class StorageDetailedWidgetProvider : AppWidgetProvider() {
         }
     }
 
+    override fun onDeleted(context: Context, appWidgetIds: IntArray) {
+        super.onDeleted(context, appWidgetIds)
+        for (id in appWidgetIds) { WidgetTheme.removeWidgetTheme(context, id) }
+    }
+
     companion object {
         fun updateAppWidget(context: Context, appWidgetManager: AppWidgetManager, appWidgetId: Int) {
             val views = RemoteViews(context.packageName, R.layout.widget_layout)
-            val bitmap = renderDetailedStorage(context)
+            val bitmap = renderDetailedStorage(context, appWidgetId)
             views.setImageViewBitmap(R.id.widget_image, bitmap)
 
             val intent = Intent(context, MainActivity::class.java)
@@ -39,7 +44,7 @@ class StorageDetailedWidgetProvider : AppWidgetProvider() {
             appWidgetManager.updateAppWidget(appWidgetId, views)
         }
 
-        private fun renderDetailedStorage(context: Context): Bitmap {
+        private fun renderDetailedStorage(context: Context, appWidgetId: Int): Bitmap {
             // 4x2 Wide widget - 800x400
             val width = 800
             val height = 400
@@ -47,7 +52,7 @@ class StorageDetailedWidgetProvider : AppWidgetProvider() {
             val canvas = Canvas(bitmap)
             val paint = Paint().apply { isAntiAlias = true }
 
-            val palette = WidgetTheme.palette(context)
+            val palette = WidgetTheme.paletteForWidget(context, appWidgetId, "storage")
 
             // Background
             paint.color = palette.background

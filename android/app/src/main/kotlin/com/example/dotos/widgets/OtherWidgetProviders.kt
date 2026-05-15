@@ -64,7 +64,7 @@ class BatteryWidgetProvider : AppWidgetProvider() {
         val isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING || 
                         status == BatteryManager.BATTERY_STATUS_FULL
         
-        val bitmap = NothingRenderer.renderBatteryWidget(context, batteryPct, isCharging)
+        val bitmap = NothingRenderer.renderBatteryWidget(context, appWidgetId, batteryPct, isCharging)
         views.setImageViewBitmap(R.id.widget_image, bitmap)
         
         // Add click intent
@@ -97,7 +97,7 @@ class StorageWidgetProvider : AppWidgetProvider() {
         val gbTotal = bytesTotal / (1024.0 * 1024.0 * 1024.0)
         val usagePercent = ((bytesTotal - bytesAvailable).toFloat() / bytesTotal.toFloat())
         
-        val bitmap = NothingRenderer.renderStorageWidget(context, gbUsed, gbTotal, usagePercent)
+        val bitmap = NothingRenderer.renderStorageWidget(context, appWidgetId, gbUsed, gbTotal, usagePercent)
         views.setImageViewBitmap(R.id.widget_image, bitmap)
         
         // Add click intent
@@ -149,8 +149,8 @@ object NothingRenderer {
     }
     
     // BATTERY WIDGET - Matches Flutter BatteryCard
-    fun renderBatteryWidget(context: Context, batteryPct: Int, isCharging: Boolean): Bitmap {
-        val palette = WidgetTheme.palette(context)
+    fun renderBatteryWidget(context: Context, appWidgetId: Int, batteryPct: Int, isCharging: Boolean): Bitmap {
+        val palette = WidgetTheme.paletteForWidget(context, appWidgetId, "other")
         val bitmap = Bitmap.createBitmap(WIDTH, HEIGHT, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         val paint = Paint().apply { isAntiAlias = true }
@@ -210,8 +210,8 @@ object NothingRenderer {
     }
     
     // STORAGE WIDGET - Matches Flutter StorageCard
-    fun renderStorageWidget(context: Context, gbUsed: Double, gbTotal: Double, usagePercent: Float): Bitmap {
-        val palette = WidgetTheme.palette(context)
+    fun renderStorageWidget(context: Context, appWidgetId: Int, gbUsed: Double, gbTotal: Double, usagePercent: Float): Bitmap {
+        val palette = WidgetTheme.paletteForWidget(context, appWidgetId, "other")
         val bitmap = Bitmap.createBitmap(WIDTH, HEIGHT, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         val paint = Paint().apply { isAntiAlias = true }

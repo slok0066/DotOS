@@ -132,6 +132,11 @@ class SoundWidgetProvider : AppWidgetProvider() {
         updateAll(context, appWidgetManager)
     }
 
+    override fun onDeleted(context: Context, appWidgetIds: IntArray) {
+        super.onDeleted(context, appWidgetIds)
+        for (id in appWidgetIds) { WidgetTheme.removeWidgetTheme(context, id) }
+    }
+
     companion object {
         fun updateAll(context: Context, appWidgetManager: AppWidgetManager) {
             val component = ComponentName(context, SoundWidgetProvider::class.java)
@@ -146,7 +151,7 @@ class SoundWidgetProvider : AppWidgetProvider() {
             val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
             val currentMode = audioManager.ringerMode
             val hasDndAccess = hasNotificationPolicyAccess(context)
-            val bitmap = renderClassicWidget(context, currentMode, hasDndAccess)
+            val bitmap = renderClassicWidget(context, currentMode, hasDndAccess, appWidgetId)
 
             views.setImageViewBitmap(R.id.widget_image, bitmap)
 
@@ -201,7 +206,7 @@ class SoundSegmentsWidgetProvider : AppWidgetProvider() {
             val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
             val currentMode = audioManager.ringerMode
             val hasDndAccess = hasNotificationPolicyAccess(context)
-            val bitmap = renderSegmentsWidget(context, currentMode, hasDndAccess)
+            val bitmap = renderSegmentsWidget(context, currentMode, hasDndAccess, appWidgetId)
 
             views.setImageViewBitmap(R.id.widget_image, bitmap)
 
@@ -256,7 +261,7 @@ class SoundDialWidgetProvider : AppWidgetProvider() {
             val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
             val currentMode = audioManager.ringerMode
             val hasDndAccess = hasNotificationPolicyAccess(context)
-            val bitmap = renderDialWidget(context, currentMode, hasDndAccess)
+            val bitmap = renderDialWidget(context, currentMode, hasDndAccess, appWidgetId)
 
             views.setImageViewBitmap(R.id.widget_image, bitmap)
 
@@ -276,8 +281,8 @@ class SoundDialWidgetProvider : AppWidgetProvider() {
     }
 }
 
-private fun renderClassicWidget(context: Context, mode: Int, hasDndAccess: Boolean): Bitmap {
-    val palette = WidgetTheme.palette(context)
+private fun renderClassicWidget(context: Context, mode: Int, hasDndAccess: Boolean, appWidgetId: Int): Bitmap {
+    val palette = WidgetTheme.paletteForWidget(context, appWidgetId, "sound")
     val bitmap = Bitmap.createBitmap(WIDGET_SIZE, WIDGET_SIZE, Bitmap.Config.ARGB_8888)
     val canvas = Canvas(bitmap)
     val paint = Paint().apply { isAntiAlias = true }
@@ -307,8 +312,8 @@ private fun renderClassicWidget(context: Context, mode: Int, hasDndAccess: Boole
     return bitmap
 }
 
-private fun renderSegmentsWidget(context: Context, mode: Int, hasDndAccess: Boolean): Bitmap {
-    val palette = WidgetTheme.palette(context)
+private fun renderSegmentsWidget(context: Context, mode: Int, hasDndAccess: Boolean, appWidgetId: Int): Bitmap {
+    val palette = WidgetTheme.paletteForWidget(context, appWidgetId, "sound")
     val bitmap = Bitmap.createBitmap(WIDGET_SIZE, WIDGET_SIZE, Bitmap.Config.ARGB_8888)
     val canvas = Canvas(bitmap)
     val paint = Paint().apply { isAntiAlias = true }
@@ -365,8 +370,8 @@ private fun renderSegmentsWidget(context: Context, mode: Int, hasDndAccess: Bool
     return bitmap
 }
 
-private fun renderDialWidget(context: Context, mode: Int, hasDndAccess: Boolean): Bitmap {
-    val palette = WidgetTheme.palette(context)
+private fun renderDialWidget(context: Context, mode: Int, hasDndAccess: Boolean, appWidgetId: Int): Bitmap {
+    val palette = WidgetTheme.paletteForWidget(context, appWidgetId, "sound")
     val bitmap = Bitmap.createBitmap(WIDGET_SIZE, WIDGET_SIZE, Bitmap.Config.ARGB_8888)
     val canvas = Canvas(bitmap)
     val paint = Paint().apply { isAntiAlias = true }

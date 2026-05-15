@@ -4,30 +4,21 @@
     android:layout_height="match_parent"
     android:background="#000000"
     android:gravity="center"
-    android:orientation="vertical"
-    android:padding="16dp">
-
-    <FrameLayout
-        android:layout_width="108dp"
-        android:layout_height="92dp"
-        android:background="@drawable/widget_preview_ring">
-
-        <ImageView
-            android:layout_width="78dp"
-            android:layout_height="54dp"
-            android:layout_gravity="center"
-            android:rotation="-42"
-            android:src="@drawable/ic_whiskey_bottle"
-            android:tint="#FFFFFF" />
-    </FrameLayout>
-
+    android:orientation="vertical">
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:fontFamily="monospace"
-        android:letterSpacing="0.12"
+        android:typeface="monospace"
+        android:text="TAP"
+        android:textColor="#FFFFFF"
+        android:textSize="28sp"
+        android:textStyle="bold" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:typeface="monospace"
         android:text="BOTTLE SPIN"
-        android:textColor="#9A9A9A"
-        android:textSize="11sp" />
+        android:textColor="#999999"
+        android:textSize="8sp" />
 </LinearLayout>

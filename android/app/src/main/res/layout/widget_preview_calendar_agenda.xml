@@ -1,45 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#000000"
-    android:gravity="center_vertical"
-    android:orientation="horizontal"
+    android:background="#111111"
     android:padding="20dp">
 
     <TextView
-        android:layout_width="64dp"
-        android:layout_height="64dp"
-        android:background="@drawable/widget_preview_outline"
-        android:fontFamily="monospace"
-        android:gravity="center"
-        android:text="01"
-        android:textColor="#FFFFFF"
-        android:textSize="28sp"
-        android:textStyle="bold" />
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:typeface="monospace"
+
+        android:text="TODAY'S AGENDA"
+        android:textColor="#999999"
+        android:textSize="11sp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:typeface="monospace"
+        android:text="WEDNESDAY, MAY 14"
+        android:textColor="#999999"
+        android:textSize="8sp" />
 
     <LinearLayout
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_weight="1"
+        android:layout_marginTop="40dp"
         android:orientation="vertical">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="monospace"
-            android:text="MAY"
-            android:textColor="#FFFFFF"
-            android:textSize="18sp"
-            android:textStyle="bold" />
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginBottom="16dp">
+            <FrameLayout android:layout_width="6dp" android:layout_height="6dp" android:background="#D71921" android:layout_marginTop="2dp" android:layout_marginEnd="12dp" />
+            <TextView android:layout_width="50dp" android:layout_height="wrap_content" android:typeface="monospace" android:text="09:00" android:textColor="#999999" android:textSize="9sp" />
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:typeface="monospace" android:text="Team Standup" android:textColor="#FFFFFF" android:textSize="10sp" android:layout_marginStart="12dp" />
+        </LinearLayout>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="monospace"
-            android:text="AGENDA READY"
-            android:textColor="#9A9A9A"
-            android:textSize="11sp" />
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginBottom="16dp">
+            <FrameLayout android:layout_width="6dp" android:layout_height="6dp" android:background="#D71921" android:layout_marginTop="2dp" android:layout_marginEnd="12dp" />
+            <TextView android:layout_width="50dp" android:layout_height="wrap_content" android:typeface="monospace" android:text="11:00" android:textColor="#999999" android:textSize="9sp" />
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:typeface="monospace" android:text="Client Meeting" android:textColor="#FFFFFF" android:textSize="10sp" android:layout_marginStart="12dp" />
+        </LinearLayout>
+
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+            <FrameLayout android:layout_width="6dp" android:layout_height="6dp" android:background="#D71921" android:layout_marginTop="2dp" android:layout_marginEnd="12dp" />
+            <TextView android:layout_width="50dp" android:layout_height="wrap_content" android:typeface="monospace" android:text="14:00" android:textColor="#999999" android:textSize="9sp" />
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:typeface="monospace" android:text="Lunch with Sarah" android:textColor="#FFFFFF" android:textSize="10sp" android:layout_marginStart="12dp" />
+        </LinearLayout>
     </LinearLayout>
-</LinearLayout>
+</RelativeLayout>

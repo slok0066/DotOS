@@ -1,38 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#000000"
-    android:gravity="center"
-    android:orientation="vertical"
+    android:background="#111111"
     android:padding="16dp">
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:fontFamily="monospace"
-        android:letterSpacing="0.08"
-        android:text="MUSIC VINYL"
-        android:textColor="#9A9A9A"
-        android:textSize="14sp" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:fontFamily="monospace"
-        android:text="NOW PLAYING"
-        android:textColor="#FFFFFF"
-        android:textSize="18sp"
-        android:textStyle="bold" />
-
-    <ProgressBar
-        style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="120dp"
-        android:layout_height="4dp"
-        android:layout_marginTop="12dp"
-        android:max="100"
-        android:progress="45"
-        android:progressTint="#D71921"
-        android:progressBackgroundTint="#333333" />
-</LinearLayout>
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="top|start" android:typeface="monospace" android:text="NOW PLAYING" android:textColor="#666666" android:textSize="9sp" />
+    <FrameLayout android:layout_width="8dp" android:layout_height="8dp" android:layout_gravity="top|end" android:background="#D71921" />
+    
+        <FrameLayout android:layout_width="140dp" android:layout_height="140dp" android:layout_gravity="center">
+            <FrameLayout android:layout_width="140dp" android:layout_height="140dp" android:background="@drawable/widget_preview_ring" />
+            <FrameLayout android:layout_width="110dp" android:layout_height="110dp" android:layout_gravity="center" android:background="@drawable/widget_preview_ring_thin" />
+            <FrameLayout android:layout_width="80dp" android:layout_height="80dp" android:layout_gravity="center" android:background="@drawable/widget_preview_ring_thin" />
+            <FrameLayout android:layout_width="12dp" android:layout_height="12dp" android:layout_gravity="top|center_horizontal" android:layout_marginTop="10dp" android:background="#D71921" />
+        </FrameLayout>
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="bottom|center_horizontal" android:text="SIDE A - 33 RPM" android:textColor="#444444" android:textSize="8sp" android:layout_marginBottom="12dp"/>
+        
+</FrameLayout>

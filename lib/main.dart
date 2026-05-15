@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'core/theme.dart';
 import 'widget_selection_screen.dart';
@@ -52,11 +53,24 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
+class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+
   @override
   void initState() {
     super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      vsync: this,
+    );
+    _animationController.forward();
     _checkOnboarding();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
   }
 
   Future<void> _checkOnboarding() async {
@@ -77,26 +91,36 @@ class _SplashScreenState extends State<SplashScreen> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bgColor = isDark ? const Color(0xFF000000) : const Color(0xFFF5F5F0);
-    final textColor = isDark
-        ? const Color(0xFFFFFFFF)
-        : const Color(0xFF000000);
 
     return Scaffold(
       backgroundColor: bgColor,
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'DOTOS',
-              style: NothingTheme.doto(fontSize: 72, color: textColor),
-            ),
-            const SizedBox(height: 32),
-            CircularProgressIndicator(
-              color: isDark ? const Color(0xFF999999) : const Color(0xFF666666),
-              strokeWidth: 2,
-            ),
-          ],
+        child: FadeTransition(
+          opacity: _animationController,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.asset(
+                'assets/images/logo.png',
+                width: 180,
+                height: 180,
+              ),
+              const SizedBox(height: 32),
+              SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(
+                  color: isDark ? const Color(0xFF999999) : const Color(0xFF666666),
+                  strokeWidth: 2,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'LOADING',
+                style: NothingTheme.mono(fontSize: 10, color: isDark ? const Color(0xFF666666) : const Color(0xFF999999)),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -125,9 +149,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
     ),
     _WidgetCategory(
       'CALENDAR',
-      '5 STYLES',
+      '4 STYLES',
       'calendar',
-      'date day week events month agenda',
+      'date day week events month',
     ),
     _WidgetCategory(
       'BATTERY',
@@ -222,19 +246,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     child: FittedBox(
                       alignment: Alignment.centerLeft,
                       fit: BoxFit.scaleDown,
-                      child: Text(
-                        'DOTOS',
-                        style: NothingTheme.doto(
-                          fontSize: 28,
-                          color: textPrimary,
-                        ),
-                        maxLines: 1,
+                      child: Image.asset(
+                        'assets/images/logo.png',
+                        height: 32,
                       ),
                     ),
                   ),
                   const SizedBox(width: 12),
                   GestureDetector(
-                    onTap: widget.onToggleTheme,
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      widget.onToggleTheme();
+                    },
                     child: Container(
                       width: 40,
                       height: 40,
@@ -295,18 +318,35 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         ),
                       ]
                     : visibleCategories
+                          .asMap()
+                          .entries
                           .map(
-                            (category) => _buildCategoryCard(
-                              context,
-                              category.title,
-                              category.subtitle,
-                              category.category,
-                              textPrimary,
-                              textSecondary,
-                              textDisabled,
-                              borderColor,
-                              surfaceRaised,
-                              innerSurface,
+                            (entry) => TweenAnimationBuilder<double>(
+                              key: ValueKey(entry.value.category),
+                              tween: Tween(begin: 0.0, end: 1.0),
+                              duration: Duration(milliseconds: 400 + (entry.key * 80)),
+                              curve: const Cubic(0.2, 0.0, 0.0, 1.0),
+                              builder: (context, value, child) {
+                                return Opacity(
+                                  opacity: value,
+                                  child: Transform.translate(
+                                    offset: Offset(0, 30 * (1 - value)),
+                                    child: child,
+                                  ),
+                                );
+                              },
+                              child: _buildCategoryCard(
+                                context,
+                                entry.value.title,
+                                entry.value.subtitle,
+                                entry.value.category,
+                                textPrimary,
+                                textSecondary,
+                                textDisabled,
+                                borderColor,
+                                surfaceRaised,
+                                innerSurface,
+                              ),
                             ),
                           )
                           .toList(),
@@ -332,16 +372,31 @@ class _DashboardScreenState extends State<DashboardScreen> {
     Color innerSurface,
   ) {
     return GestureDetector(
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => WidgetSelectionScreen(
-            category: category,
-            title: title,
-            onToggleTheme: widget.onToggleTheme,
+      onTap: () {
+        HapticFeedback.mediumImpact();
+        Navigator.push(
+          context,
+          PageRouteBuilder(
+            pageBuilder: (context, animation, secondaryAnimation) => WidgetSelectionScreen(
+              category: category,
+              title: title,
+              onToggleTheme: widget.onToggleTheme,
+            ),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              const begin = Offset(0.0, 0.1);
+              const end = Offset.zero;
+              const curve = Curves.easeOutCubic;
+              var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+              var fadeTween = Tween(begin: 0.0, end: 1.0);
+              return FadeTransition(
+                opacity: fadeTween.animate(animation),
+                child: SlideTransition(position: animation.drive(tween), child: child),
+              );
+            },
+            transitionDuration: const Duration(milliseconds: 300),
           ),
-        ),
-      ),
+        );
+      },
       child: Container(
         height: 160,
         margin: const EdgeInsets.only(bottom: 20),

@@ -38,6 +38,11 @@ class ClockAnalogWidgetProvider : AppWidgetProvider() {
         cancelUpdates(context)
     }
 
+    override fun onDeleted(context: Context, appWidgetIds: IntArray) {
+        super.onDeleted(context, appWidgetIds)
+        for (id in appWidgetIds) { WidgetTheme.removeWidgetTheme(context, id) }
+    }
+
     companion object {
         private const val ACTION_UPDATE = "com.example.dotos.ACTION_UPDATE_CLOCK_ANALOG"
         
@@ -80,7 +85,7 @@ class ClockAnalogWidgetProvider : AppWidgetProvider() {
         
         fun updateAppWidget(context: Context, appWidgetManager: AppWidgetManager, appWidgetId: Int) {
             val views = RemoteViews(context.packageName, R.layout.widget_layout)
-            val bitmap = renderAnalogClock(context)
+            val bitmap = renderAnalogClock(context, appWidgetId)
             views.setImageViewBitmap(R.id.widget_image, bitmap)
 
             val intent = Intent(context, MainActivity::class.java)
@@ -93,8 +98,8 @@ class ClockAnalogWidgetProvider : AppWidgetProvider() {
             appWidgetManager.updateAppWidget(appWidgetId, views)
         }
 
-        private fun renderAnalogClock(context: Context): Bitmap {
-            val palette = WidgetTheme.palette(context)
+        private fun renderAnalogClock(context: Context, appWidgetId: Int): Bitmap {
+            val palette = WidgetTheme.paletteForWidget(context, appWidgetId, "clock")
             val width = 800
             val height = 400
             val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)

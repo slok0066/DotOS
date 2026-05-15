@@ -33,10 +33,15 @@ class MusicCompactWidgetProvider : AppWidgetProvider() {
             MusicNotificationListener.handleMediaControl(context, "TOGGLE")
         }
     }
+    override fun onDeleted(context: Context, appWidgetIds: IntArray) {
+        super.onDeleted(context, appWidgetIds)
+        for (id in appWidgetIds) { WidgetTheme.removeWidgetTheme(context, id) }
+    }
+
     companion object {
         fun updateWidget(context: Context, mgr: AppWidgetManager, id: Int) {
             val views = RemoteViews(context.packageName, R.layout.widget_layout)
-            val palette = WidgetTheme.palette(context)
+            val palette = WidgetTheme.paletteForWidget(context, id, "music")
             views.setImageViewBitmap(R.id.widget_image, render(context, palette))
             views.setOnClickPendingIntent(R.id.widget_image, PendingIntent.getBroadcast(context, id + 3000,
                 Intent(context, MusicCompactWidgetProvider::class.java).apply { action = "ACTION_MUSIC_COMPACT_TOGGLE" },
@@ -107,7 +112,7 @@ class MusicTickerWidgetProvider : AppWidgetProvider() {
     companion object {
         fun updateWidget(context: Context, mgr: AppWidgetManager, id: Int) {
             val views = RemoteViews(context.packageName, R.layout.widget_layout)
-            val palette = WidgetTheme.palette(context)
+            val palette = WidgetTheme.paletteForWidget(context, id, "music")
             views.setImageViewBitmap(R.id.widget_image, render(context, palette))
             views.setOnClickPendingIntent(R.id.widget_image, PendingIntent.getBroadcast(context, id + 4000,
                 Intent(context, MusicTickerWidgetProvider::class.java).apply { action = "ACTION_MUSIC_TICKER_TOGGLE" },
@@ -177,7 +182,7 @@ class MusicWaveWidgetProvider : AppWidgetProvider() {
 
         fun updateWidget(context: Context, mgr: AppWidgetManager, id: Int) {
             val views = RemoteViews(context.packageName, R.layout.widget_layout)
-            val palette = WidgetTheme.palette(context)
+            val palette = WidgetTheme.paletteForWidget(context, id, "music")
             views.setImageViewBitmap(R.id.widget_image, render(context, palette))
             views.setOnClickPendingIntent(R.id.widget_image, PendingIntent.getBroadcast(context, id + 5000,
                 Intent(context, MusicWaveWidgetProvider::class.java).apply { action = "ACTION_MUSIC_WAVE_TOGGLE" },
